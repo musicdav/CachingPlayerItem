@@ -41,7 +41,7 @@ public final class CachingPlayerItem: AVPlayerItem {
     private let url: URL
     private let initialScheme: String?
     private let saveFilePath: String
-    private var customFileExtension: String?
+    private let customFileExtension: String?
     /// HTTPHeaderFields set in avUrlAssetOptions using AVURLAssetHTTPHeaderFieldsKey
     internal var urlRequestHeaders: [String: String]?
 
@@ -115,6 +115,7 @@ public final class CachingPlayerItem: AVPlayerItem {
             urlWithCustomScheme.appendPathExtension(ext)
             self.customFileExtension = ext
         }  else {
+            self.customFileExtension = nil
             assert(url.pathExtension.isEmpty == false, "CachingPlayerItem error: url pathExtension empty, pass the extension in `customFileExtension` parameter")
         }
 
@@ -142,6 +143,7 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.url = url
         self.saveFilePath = ""
         self.initialScheme = nil
+        self.customFileExtension = nil
 
         let asset = AVURLAsset(url: url, options: avUrlAssetOptions)
         super.init(asset: asset, automaticallyLoadedAssetKeys: nil)
@@ -190,6 +192,7 @@ public final class CachingPlayerItem: AVPlayerItem {
         // Not needed properties when playing media from a local file.
         self.saveFilePath = ""
         self.initialScheme = nil
+        self.customFileExtension = nil
 
         super.init(asset: AVURLAsset(url: url), automaticallyLoadedAssetKeys: nil)
 
@@ -206,6 +209,7 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.url = URL(fileURLWithPath: "")
         self.initialScheme = nil
         self.saveFilePath = ""
+        self.customFileExtension = nil
         super.init(asset: asset, automaticallyLoadedAssetKeys: automaticallyLoadedAssetKeys)
 
         addObservers()
