@@ -68,6 +68,8 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter url: URL referencing the media file.
 
      - parameter avUrlAssetOptions: A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,
+
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      see [Initialization Options.](https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options)
      */
     public convenience init(url: URL, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default) {
@@ -83,6 +85,8 @@ public final class CachingPlayerItem: AVPlayerItem {
 
      - parameter avUrlAssetOptions: A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,
      see [Initialization Options.](https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options)
+
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      */
     public convenience init(url: URL, customFileExtension: String, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: customFileExtension), customFileExtension: customFileExtension, avUrlAssetOptions: avUrlAssetOptions, configuration: configuration)
@@ -99,6 +103,8 @@ public final class CachingPlayerItem: AVPlayerItem {
 
      - parameter avUrlAssetOptions: A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,
      see [Initialization Options.](https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options)
+
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      */
     public init(url: URL,
                 saveFilePath: String,
@@ -144,6 +150,8 @@ public final class CachingPlayerItem: AVPlayerItem {
 
      - parameter avUrlAssetOptions: A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,
      see [Initialization Options.](https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options)
+
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      */
     public init(nonCachingURL url: URL, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         self.url = url
@@ -165,6 +173,8 @@ public final class CachingPlayerItem: AVPlayerItem {
 
      - parameter customFileExtension: Media file extension. E.g. mp4, mp3. This is required for the player to work correctly with the intended file type.
 
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
+
      - throws: An error in the Cocoa domain, if there is an error writing to the `URL`.
      */
     public convenience init(data: Data, customFileExtension: String, configuration: CachingPlayerItemConfiguration = .default) throws {
@@ -180,6 +190,8 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter filePathURL: The local file path of a media file.
 
      - parameter fileExtension: Media file extension. E.g. mp4, mp3. **Required**  if `filePathURL.pathExtension` is empty.
+
+     - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      */
     public init(filePathURL: URL, fileExtension: String? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         if let fileExtension = fileExtension {
