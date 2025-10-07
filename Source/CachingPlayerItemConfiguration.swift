@@ -9,7 +9,7 @@ import Foundation
 
 /// CachingPlayerItem global configuration.
 public struct CachingPlayerItemConfiguration {
-    /// How much data is downloaded in memory before stored on a file. Defaults to `128.KB`.
+    /// How much data is downloaded in memory before stored on a file. Defaults to `15.MB`.
     @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var downloadBufferLimit: Int {
         set {
@@ -127,7 +127,7 @@ public struct CachingPlayerItemConfiguration {
     /** The default configuration instance used for `CachingPlayerItem` instances.
 
      Default values:
-     - downloadBufferLimit: 128 KB
+     - downloadBufferLimit: 15 MB
      - readDataLimit: 10 MB
      - shouldVerifyDownloadedFileSize: false
      - minimumExpectedFileSize: 0
@@ -154,7 +154,7 @@ public struct CachingPlayerItemConfiguration {
     /**
      Creates a new configuration instance.
 
-     - Parameter downloadBufferLimit: How much data is downloaded in memory before stored on a file. Defaults to 128 KB.
+     - Parameter downloadBufferLimit: How much data is downloaded in memory before stored on a file. Defaults to 15 MB.
      - Parameter readDataLimit: How much data is allowed to be read in memory at a time. Defaults to 10 MB.
      - Parameter shouldVerifyDownloadedFileSize: Flag for deciding whether an error should be thrown when URLResponse's expectedContentLength is not equal with the downloaded media file bytes count. Defaults to `false`.
      - Parameter minimumExpectedFileSize: If set greater than 0, the set value will be compared with the downloaded media size. If the size of the downloaded media is lower, an error will be thrown. Useful when `expectedContentLength` is unavailable. Defaults to 0.
@@ -163,7 +163,7 @@ public struct CachingPlayerItemConfiguration {
      - Parameter logLevel: Log level. Defaults to `.none`.
      */
     public init(
-        downloadBufferLimit: Int = 128 * 1024, // 128KB
+        downloadBufferLimit: Int = 15 * 1024 * 1024, // 15MB
         readDataLimit: Int = 10 * 1024 * 1024, // 10MB
         shouldVerifyDownloadedFileSize: Bool = false,
         minimumExpectedFileSize: Int = 0,
@@ -179,9 +179,4 @@ public struct CachingPlayerItemConfiguration {
         self.allowsUncachedSeek = allowsUncachedSeek
         self.logLevel = logLevel
     }
-}
-
-fileprivate extension Int {
-    var KB: Int { return self * 1024 }
-    var MB: Int { return self * 1024 * 1024 }
 }
