@@ -146,6 +146,8 @@ public struct CachingPlayerItemConfiguration {
     public let minimumExpectedFileSize: Int
     /// Flag for deciding whether an `NSFileWriteOutOfSpaceError` should be thrown when there is not enough available disk space left for caching the entire media file.
     public let shouldCheckAvailableDiskSpaceBeforeCaching: Bool
+    /// Allows seeking into uncached parts of the media, downloading data temporarily.
+    public let allowsUncachedSeek: Bool
     /// Log level.
     public let logLevel: LogLevel
 
@@ -157,6 +159,7 @@ public struct CachingPlayerItemConfiguration {
      - Parameter shouldVerifyDownloadedFileSize: Flag for deciding whether an error should be thrown when URLResponse's expectedContentLength is not equal with the downloaded media file bytes count. Defaults to `false`.
      - Parameter minimumExpectedFileSize: If set greater than 0, the set value will be compared with the downloaded media size. If the size of the downloaded media is lower, an error will be thrown. Useful when `expectedContentLength` is unavailable. Defaults to 0.
      - Parameter shouldCheckAvailableDiskSpaceBeforeCaching: Flag for deciding whether an `NSFileWriteOutOfSpaceError` should be thrown when there is not enough available disk space left for caching the entire media file. Defaults to `true`.
+     - Parameter allowsUncachedSeek: Allows seeking into uncached parts of the media, downloading data temporarily. Defaults to `true`.
      - Parameter logLevel: Log level. Defaults to `.none`.
      */
     public init(
@@ -165,6 +168,7 @@ public struct CachingPlayerItemConfiguration {
         shouldVerifyDownloadedFileSize: Bool = false,
         minimumExpectedFileSize: Int = 0,
         shouldCheckAvailableDiskSpaceBeforeCaching: Bool = true,
+        allowsUncachedSeek: Bool = true,
         logLevel: LogLevel = .none
     ) {
         self.downloadBufferLimit = downloadBufferLimit
@@ -172,6 +176,7 @@ public struct CachingPlayerItemConfiguration {
         self.shouldVerifyDownloadedFileSize = shouldVerifyDownloadedFileSize
         self.minimumExpectedFileSize = minimumExpectedFileSize
         self.shouldCheckAvailableDiskSpaceBeforeCaching = shouldCheckAvailableDiskSpaceBeforeCaching
+        self.allowsUncachedSeek = allowsUncachedSeek
         self.logLevel = logLevel
     }
 }

@@ -78,7 +78,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     func resourceLoader(_ resourceLoader: AVAssetResourceLoader, didCancel loadingRequest: AVAssetResourceLoadingRequest) {
         addOperationOnQueue { [weak self] in
             guard let self else { return }
-            guard let key = pendingDataRequests.first(where: { $1.loadingRequest.request.url == loadingRequest.request.url })?.key else { return }
+            guard let key = pendingDataRequests.first(where: { $1.loadingRequest == loadingRequest })?.key else { return }
 
             pendingDataRequests[key]?.cancelTask()
             pendingDataRequests.removeValue(forKey: key)
@@ -187,7 +187,6 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 pendingContentInfoRequest = nil
                 pendingDataRequests.removeAll()
             }
-
         }
 
         // We need to only remove the file if it hasn't been fully downloaded
@@ -296,7 +295,13 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
 extension ResourceLoaderDelegate: PendingDataRequestDelegate {
     func pendingDataRequest(_ request: PendingDataRequest, hasSufficientCachedDataFor offset: Int, with length: Int) -> Bool {
-        fileHandle.fileSize >= length + offset
+        if configuration.allowsUncachedSeek {
+            // Request remote data temporarily if the requested data is not yet cached
+            return fileHandle.fileSize >= length + offset
+        } else {
+            // Always request cached data
+            return true
+        }
     }
 
     func pendingDataRequest(_ request: PendingDataRequest,
