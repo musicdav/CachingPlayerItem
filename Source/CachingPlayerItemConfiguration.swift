@@ -136,11 +136,17 @@ public struct CachingPlayerItemConfiguration {
     */
     public static var `default` = CachingPlayerItemConfiguration()
 
+    /// How much data is downloaded in memory before stored on a file.
     public let downloadBufferLimit: Int
+    /// How much data is allowed to be read in memory at a time.
     public let readDataLimit: Int
+    /// Flag for deciding whether an error should be thrown when URLResponse's expectedContentLength is not equal with the downloaded media file bytes count.
     public let shouldVerifyDownloadedFileSize: Bool
+    /// If set greater than 0, the set value with be compared with the downloaded media size. If the size of the downloaded media is lower, an error will be thrown. Useful when `expectedContentLength` is unavailable.
     public let minimumExpectedFileSize: Int
+    /// Flag for deciding whether an `NSFileWriteOutOfSpaceError` should be thrown when there is not enough available disk space left for caching the entire media file.
     public let shouldCheckAvailableDiskSpaceBeforeCaching: Bool
+    /// Log level.
     public let logLevel: LogLevel
 
     /**
