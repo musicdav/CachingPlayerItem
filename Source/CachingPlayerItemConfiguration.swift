@@ -10,7 +10,7 @@ import Foundation
 /// CachingPlayerItem global configuration.
 public struct CachingPlayerItemConfiguration {
     /// How much data is downloaded in memory before stored on a file. Defaults to `128.KB`.
-    @available(*, deprecated, renamed: "default.downloadBufferLimit")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var downloadBufferLimit: Int {
         set {
             Self.default = CachingPlayerItemConfiguration(
@@ -29,7 +29,7 @@ public struct CachingPlayerItemConfiguration {
     }
 
     /// How much data is allowed to be read in memory at a time. Defaults to `10.MB`.
-    @available(*, deprecated, renamed: "default.readDataLimit")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var readDataLimit: Int {
         set {
             Self.default = CachingPlayerItemConfiguration(
@@ -48,7 +48,7 @@ public struct CachingPlayerItemConfiguration {
     }
 
     /// Flag for deciding whether an error should be thrown when URLResponse's expectedContentLength is not equal with the downloaded media file bytes count. Defaults to `false`.
-    @available(*, deprecated, renamed: "default.shouldVerifyDownloadedFileSize")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var shouldVerifyDownloadedFileSize: Bool {
         set {
             Self.default = CachingPlayerItemConfiguration(
@@ -68,7 +68,7 @@ public struct CachingPlayerItemConfiguration {
 
     /// If set greater than 0, the set value with be compared with the downloaded media size. If the size of the downloaded media is lower, an error will be thrown. Useful when `expectedContentLength` is unavailable.
     /// Default value is `0`.
-    @available(*, deprecated, renamed: "default.minimumExpectedFileSize")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var minimumExpectedFileSize: Int {
         set {
             Self.default = CachingPlayerItemConfiguration(
@@ -87,7 +87,7 @@ public struct CachingPlayerItemConfiguration {
     }
 
     /// Flag for deciding whether an `NSFileWriteOutOfSpaceError` should be thrown when there is not enough available disk space left for caching the entire media file. Defaults to `true`.
-    @available(*, deprecated, renamed: "default.shouldCheckAvailableDiskSpaceBeforeCaching")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var shouldCheckAvailableDiskSpaceBeforeCaching: Bool {
         set {
             Self.default = CachingPlayerItemConfiguration(
@@ -106,7 +106,7 @@ public struct CachingPlayerItemConfiguration {
     }
 
     /// Log level. Defaults to `none`.
-    @available(*, deprecated, renamed: "default.logLevel")
+    @available(*, deprecated, message: "Use `default` instance instead to set configuration values.")
     public static var logLevel: LogLevel {
         set {
             Self.default = CachingPlayerItemConfiguration(
