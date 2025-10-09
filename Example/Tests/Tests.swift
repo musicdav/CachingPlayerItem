@@ -759,7 +759,12 @@ class CachingPlayerItemSpec: QuickSpec {
                     let specialURL = URL(string: "https://example.com/video%20file.mp4")!
                     let item = CachingPlayerItem(url: specialURL)
 
-                    expect(item.asset).to(beAKindOf(AVURLAsset.self))
+                    guard let urlAsset = item.asset as? AVURLAsset else {
+                        fail("Expected AVURLAsset")
+                        return
+                    }
+
+                    expect(urlAsset.url.path()).to(equal(specialURL.path()))
                 }
             }
 
