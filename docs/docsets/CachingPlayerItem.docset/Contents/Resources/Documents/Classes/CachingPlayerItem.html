@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          CachingPlayerItem 2.1.0 Docs
+          CachingPlayerItem 2.2.0 Docs
         </a>
-         (86% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -48,7 +48,9 @@
     </header>
 
     <p class="breadcrumbs">
-      <a class="breadcrumb" href="../index.html">CachingPlayerItem Reference</a>
+      <a class="breadcrumb" href="../index.html">CachingPlayerItem</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      <a class="breadcrumb" href="../Classes.html">Classes</a>
       <img class="carat" src="../img/carat.png" alt=""/>
       CachingPlayerItem Class Reference
     </p>
@@ -68,9 +70,6 @@
             <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="../Enums/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a>
-              </li>
-              <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Enums/LogLevel.html">LogLevel</a>
               </li>
             </ul>
@@ -80,6 +79,14 @@
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="../Protocols/CachingPlayerItemDelegate.html">CachingPlayerItemDelegate</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a>
               </li>
             </ul>
           </li>
@@ -129,6 +136,34 @@
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
 <span class="kd">public</span> <span class="k">var</span> <span class="nv">passOnObject</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:17CachingPlayerItemAAC02isA0Sbvp"></a>
+                    <a name="//apple_ref/swift/Property/isCaching" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC02isA0Sbvp">isCaching</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Indicates whether media content is currently being cached to disk. Returns <code>false</code> for initializers that don&rsquo;t support caching.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@MainActor</span>
+<span class="kd">public</span> <span class="k">var</span> <span class="nv">isCaching</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
 
                         </div>
                       </div>
@@ -225,9 +260,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC3url17avUrlAssetOptionsAB10Foundation3URLV_SDySSypGSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(url:avUrlAssetOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC3url17avUrlAssetOptionsAB10Foundation3URLV_SDySSypGSgtcfc">init(url:<wbr>avUrlAssetOptions:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC3url17avUrlAssetOptions13configurationAB10Foundation3URLV_SDySSypGSgAA0abC13ConfigurationVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(url:avUrlAssetOptions:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC3url17avUrlAssetOptions13configurationAB10Foundation3URLV_SDySSypGSgAA0abC13ConfigurationVtcfc">init(url:<wbr>avUrlAssetOptions:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -243,7 +278,7 @@
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -271,7 +306,19 @@
                               </td>
                               <td>
                                 <div>
-                                  <p>A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,
+                                  <p>A dictionary that contains options used to customize the initialization of the asset. For supported keys and values,</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.
 see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options">Initialization Options.</a></p>
                                 </div>
                               </td>
@@ -285,9 +332,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC3url19customFileExtension17avUrlAssetOptionsAB10Foundation3URLV_SSSDySSypGSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(url:customFileExtension:avUrlAssetOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC3url19customFileExtension17avUrlAssetOptionsAB10Foundation3URLV_SSSDySSypGSgtcfc">init(url:<wbr>customFileExtension:<wbr>avUrlAssetOptions:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC3url19customFileExtension17avUrlAssetOptions13configurationAB10Foundation3URLV_SSSDySSypGSgAA0abC13ConfigurationVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(url:customFileExtension:avUrlAssetOptions:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC3url19customFileExtension17avUrlAssetOptions13configurationAB10Foundation3URLV_SSSDySSypGSgAA0abC13ConfigurationVtcfc">init(url:<wbr>customFileExtension:<wbr>avUrlAssetOptions:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -303,7 +350,7 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -348,6 +395,18 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -357,9 +416,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC3url12saveFilePath06customF9Extension17avUrlAssetOptionsAB10Foundation3URLV_S2SSgSDySSypGSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(url:saveFilePath:customFileExtension:avUrlAssetOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC3url12saveFilePath06customF9Extension17avUrlAssetOptionsAB10Foundation3URLV_S2SSgSDySSypGSgtcfc">init(url:<wbr>saveFilePath:<wbr>customFileExtension:<wbr>avUrlAssetOptions:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC3url12saveFilePath06customF9Extension17avUrlAssetOptions13configurationAB10Foundation3URLV_S2SSgSDySSypGSgAA0abC13ConfigurationVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(url:saveFilePath:customFileExtension:avUrlAssetOptions:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC3url12saveFilePath06customF9Extension17avUrlAssetOptions13configurationAB10Foundation3URLV_S2SSgSDySSypGSgAA0abC13ConfigurationVtcfc">init(url:<wbr>saveFilePath:<wbr>customFileExtension:<wbr>avUrlAssetOptions:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -375,7 +434,11 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">saveFilePath</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span>
+            <span class="nv">saveFilePath</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+            <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span>
+            <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+            <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -432,6 +495,18 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -441,9 +516,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC03nonA3URL17avUrlAssetOptionsAB10Foundation0E0V_SDySSypGSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(nonCachingURL:avUrlAssetOptions:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC03nonA3URL17avUrlAssetOptionsAB10Foundation0E0V_SDySSypGSgtcfc">init(nonCachingURL:<wbr>avUrlAssetOptions:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC03nonA3URL17avUrlAssetOptions13configurationAB10Foundation0E0V_SDySSypGSgAA0abC13ConfigurationVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(nonCachingURL:avUrlAssetOptions:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC03nonA3URL17avUrlAssetOptions13configurationAB10Foundation0E0V_SDySSypGSgAA0abC13ConfigurationVtcfc">init(nonCachingURL:<wbr>avUrlAssetOptions:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -459,7 +534,7 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">nonCachingURL</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="n">nonCachingURL</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">avUrlAssetOptions</span><span class="p">:</span> <span class="p">[</span><span class="kt">String</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -492,6 +567,18 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -501,9 +588,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC4data19customFileExtensionAB10Foundation4DataV_SStKcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(data:customFileExtension:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC4data19customFileExtensionAB10Foundation4DataV_SStKcfc">init(data:<wbr>customFileExtension:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC4data19customFileExtension13configurationAB10Foundation4DataV_SSAA0abC13ConfigurationVtKcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(data:customFileExtension:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC4data19customFileExtension13configurationAB10Foundation4DataV_SSAA0abC13ConfigurationVtKcfc">init(data:<wbr>customFileExtension:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -524,7 +611,7 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span></code></pre>
+<span class="kd">public</span> <span class="kd">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="nv">data</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">customFileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -556,6 +643,18 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                                 </div>
                               </td>
                             </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -565,9 +664,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:17CachingPlayerItemAAC11filePathURL0D9ExtensionAB10Foundation0F0V_SSSgtcfc"></a>
-                    <a name="//apple_ref/swift/Method/init(filePathURL:fileExtension:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:17CachingPlayerItemAAC11filePathURL0D9ExtensionAB10Foundation0F0V_SSSgtcfc">init(filePathURL:<wbr>fileExtension:<wbr>)</a>
+                    <a name="/s:17CachingPlayerItemAAC11filePathURL0D9Extension13configurationAB10Foundation0F0V_SSSgAA0abC13ConfigurationVtcfc"></a>
+                    <a name="//apple_ref/swift/Method/init(filePathURL:fileExtension:configuration:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:17CachingPlayerItemAAC11filePathURL0D9Extension13configurationAB10Foundation0F0V_SSSgAA0abC13ConfigurationVtcfc">init(filePathURL:<wbr>fileExtension:<wbr>configuration:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -583,7 +682,7 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
-<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">filePathURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">fileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+<span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">filePathURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">fileExtension</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/CachingPlayerItemConfiguration.html">CachingPlayerItemConfiguration</a></span> <span class="o">=</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -612,6 +711,18 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                               <td>
                                 <div>
                                   <p>Media file extension. E.g. mp4, mp3. <strong>Required</strong>  if <code>filePathURL.pathExtension</code> is empty.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Configuration for the caching and downloading behavior. Defaults to <code>.default</code>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -784,9 +895,9 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">@MainActor</span>
 <span class="kd">public</span> <span class="k">override</span> <span class="kd">func</span> <span class="nf">observeValue</span><span class="p">(</span><span class="n">forKeyPath</span> <span class="nv">keyPath</span><span class="p">:</span> <span class="kt">String</span><span class="p">?,</span>
-                           <span class="n">of</span> <span class="nv">object</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span>
-                           <span class="nv">change</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSKeyValueChangeKey</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?,</span>
-                           <span class="nv">context</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?)</span></code></pre>
+                                  <span class="n">of</span> <span class="nv">object</span><span class="p">:</span> <span class="kt">Any</span><span class="p">?,</span>
+                                  <span class="nv">change</span><span class="p">:</span> <span class="p">[</span><span class="kt">NSKeyValueChangeKey</span> <span class="p">:</span> <span class="kt">Any</span><span class="p">]?,</span>
+                                  <span class="nv">context</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?)</span></code></pre>
 
                         </div>
                       </div>
@@ -801,8 +912,8 @@ see <a href="https://developer.apple.com/documentation/avfoundation/avurlasset/i
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2025 <a class="link" href="https://github.com/sukov/CachingPlayerItem" target="_blank" rel="external noopener">Gorjan Shukov</a>. All rights reserved. (Last updated: 2025-09-08)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+      <p>&copy; 2025 <a class="link" href="https://github.com/sukov/CachingPlayerItem" target="_blank" rel="external noopener">Gorjan Shukov</a>. All rights reserved. (Last updated: 2025-10-10)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.3</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
 </html>
