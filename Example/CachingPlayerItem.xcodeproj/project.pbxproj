@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
-		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
@@ -16,6 +15,10 @@
 		6DA53487254485850082A1B6 /* CachingPlayerItemExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA53485254485850082A1B6 /* CachingPlayerItemExtension.swift */; };
 		6DA53491254487B40082A1B6 /* VideoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DA53490254487B40082A1B6 /* VideoModel.swift */; };
 		6DC2BF342E8F185400E14F64 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC2BF332E8F184F00E14F64 /* SceneDelegate.swift */; };
+		6DE98C9A2E9957BF00D74254 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE98C992E9957AE00D74254 /* MainViewController.swift */; };
+		6DE98C9C2E9957F800D74254 /* SingleMediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE98C9B2E9957EC00D74254 /* SingleMediaViewController.swift */; };
+		6DE98C9E2E99587A00D74254 /* MediaCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE98C9D2E99587900D74254 /* MediaCollectionViewController.swift */; };
+		6DE98CA02E99589A00D74254 /* MediaVideoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE98C9F2E99589500D74254 /* MediaVideoCell.swift */; };
 		AC2E743B378A5946385454EB /* Pods_CachingPlayerItem_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 429F6FC42DC9AED78589EE03 /* Pods_CachingPlayerItem_Tests.framework */; };
 		B217696C05A59EACA0B02667 /* Pods_CachingPlayerItem_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 941366B2E6ABB5BCA5C17F19 /* Pods_CachingPlayerItem_Example.framework */; };
 /* End PBXBuildFile section */
@@ -37,7 +40,6 @@
 		607FACD01AFB9204008FA782 /* CachingPlayerItem_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CachingPlayerItem_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		607FACD71AFB9204008FA782 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* CachingPlayerItem_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CachingPlayerItem_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,6 +49,10 @@
 		6DA53485254485850082A1B6 /* CachingPlayerItemExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingPlayerItemExtension.swift; sourceTree = "<group>"; };
 		6DA53490254487B40082A1B6 /* VideoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoModel.swift; sourceTree = "<group>"; };
 		6DC2BF332E8F184F00E14F64 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		6DE98C992E9957AE00D74254 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		6DE98C9B2E9957EC00D74254 /* SingleMediaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleMediaViewController.swift; sourceTree = "<group>"; };
+		6DE98C9D2E99587900D74254 /* MediaCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCollectionViewController.swift; sourceTree = "<group>"; };
+		6DE98C9F2E99589500D74254 /* MediaVideoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaVideoCell.swift; sourceTree = "<group>"; };
 		941366B2E6ABB5BCA5C17F19 /* Pods_CachingPlayerItem_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CachingPlayerItem_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B8ADE543F9C0B8D29F89E3F /* Pods-CachingPlayerItem_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CachingPlayerItem_Example.debug.xcconfig"; path = "Target Support Files/Pods-CachingPlayerItem_Example/Pods-CachingPlayerItem_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		AD7CA28E427DDAF625607C15 /* CachingPlayerItem.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = CachingPlayerItem.podspec; path = ../CachingPlayerItem.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -110,11 +116,12 @@
 		607FACD21AFB9204008FA782 /* Example for CachingPlayerItem */ = {
 			isa = PBXGroup;
 			children = (
-				6DC2BF332E8F184F00E14F64 /* SceneDelegate.swift */,
+				6DE98CA52E99590100D74254 /* Models */,
+				6DE98CA12E9958A700D74254 /* Single */,
+				6DE98CA42E9958BD00D74254 /* Collection */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				607FACD71AFB9204008FA782 /* ViewController.swift */,
-				6DA53490254487B40082A1B6 /* VideoModel.swift */,
-				6DA53484254485850082A1B6 /* Playable.swift */,
+				6DC2BF332E8F184F00E14F64 /* SceneDelegate.swift */,
+				6DE98C992E9957AE00D74254 /* MainViewController.swift */,
 				6DA53485254485850082A1B6 /* CachingPlayerItemExtension.swift */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
@@ -157,6 +164,32 @@
 				D27E2A668C262FBB93BFE8D1 /* LICENSE */,
 			);
 			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
+		6DE98CA12E9958A700D74254 /* Single */ = {
+			isa = PBXGroup;
+			children = (
+				6DE98C9B2E9957EC00D74254 /* SingleMediaViewController.swift */,
+			);
+			path = Single;
+			sourceTree = "<group>";
+		};
+		6DE98CA42E9958BD00D74254 /* Collection */ = {
+			isa = PBXGroup;
+			children = (
+				6DE98C9F2E99589500D74254 /* MediaVideoCell.swift */,
+				6DE98C9D2E99587900D74254 /* MediaCollectionViewController.swift */,
+			);
+			path = Collection;
+			sourceTree = "<group>";
+		};
+		6DE98CA52E99590100D74254 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				6DA53490254487B40082A1B6 /* VideoModel.swift */,
+				6DA53484254485850082A1B6 /* Playable.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		A63946F23062FC53E26648B4 /* Frameworks */ = {
@@ -372,8 +405,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				6DE98C9A2E9957BF00D74254 /* MainViewController.swift in Sources */,
+				6DE98CA02E99589A00D74254 /* MediaVideoCell.swift in Sources */,
+				6DE98C9E2E99587A00D74254 /* MediaCollectionViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				6DE98C9C2E9957F800D74254 /* SingleMediaViewController.swift in Sources */,
 				6DA53487254485850082A1B6 /* CachingPlayerItemExtension.swift in Sources */,
 				6DA53491254487B40082A1B6 /* VideoModel.swift in Sources */,
 				6DA53486254485850082A1B6 /* Playable.swift in Sources */,

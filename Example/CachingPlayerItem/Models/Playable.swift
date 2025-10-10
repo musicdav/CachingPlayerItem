@@ -13,4 +13,12 @@ protocol Playable {
     var id: String { get }
     var streamURL: URL { get }
     var fileExtension: String { get }
+    var saveFilePath: URL { get }
+    var isCached: Bool { get }
+}
+
+extension Playable {
+    var isCached: Bool {
+        FileManager.default.fileExists(atPath: saveFilePath.path)
+    }
 }

@@ -15,13 +15,8 @@ extension CachingPlayerItem {
     }
 
     convenience init(model: Playable) {
-        var saveFilePath = try! FileManager.default.url(for: .cachesDirectory,
-                                                                 in: .userDomainMask,
-                                                                 appropriateFor: nil,
-                                                                 create: true)
-        saveFilePath.appendPathComponent(model.id)
-        saveFilePath.appendPathExtension(model.fileExtension)
-
+        let saveFilePath = model.saveFilePath
+        
         if FileManager.default.fileExists(atPath: saveFilePath.path) {
             self.init(filePathURL: saveFilePath)
             print("Playing from cached local file.")
