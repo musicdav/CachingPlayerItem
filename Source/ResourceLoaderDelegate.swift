@@ -33,7 +33,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private var contentInfoResponse: URLResponse?
     private var pendingDataRequests: [PendingRequestId: PendingDataRequest] = [:]
     private var fullMediaFileDownloadTask: URLSessionDataTask?
-    private var isDownloadComplete = false
+    private(set) var isDownloadComplete = false
 
     private let url: URL
     private let saveFilePath: String

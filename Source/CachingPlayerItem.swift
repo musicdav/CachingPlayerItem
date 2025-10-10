@@ -48,6 +48,10 @@ public final class CachingPlayerItem: AVPlayerItem {
 
     /// Useful for keeping relevant model associated with CachingPlayerItem instance. This is a **strong** reference, be mindful not to create a **retain cycle**.
     public var passOnObject: Any?
+    /// Indicates whether media content is currently being cached to disk. Returns `false` for initializers that don't support caching.
+    public var isCaching: Bool {
+        initialScheme != nil && !resourceLoaderDelegate.isDownloadComplete
+    }
     /// `delegate` for status updates.
     public weak var delegate: CachingPlayerItemDelegate?
 
