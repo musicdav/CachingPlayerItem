@@ -3,7 +3,6 @@
 [![Build Status](https://github.com/Quick/Quick/actions/workflows/ci-xcode.yml/badge.svg)](https://github.com/Quick/Quick/actions/workflows/ci-xcode.yml)
 [![CocoaPods](https://img.shields.io/cocoapods/v/Quick.svg)](https://cocoapods.org/pods/Quick)
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Accio supported](https://img.shields.io/badge/Accio-supported-0A7CF5.svg?style=flat)](https://github.com/JamitLabs/Accio)
 [![Platforms](https://img.shields.io/cocoapods/p/Quick.svg)](https://cocoapods.org/pods/Quick)
 
 Quick is a behavior-driven development framework for Swift and Objective-C.
@@ -18,7 +17,7 @@ import Quick
 import Nimble
 
 class TableOfContentsSpec: QuickSpec {
-  override func spec() {
+  override class func spec() {
     describe("the 'Documentation' directory") {
       it("has everything you need to get started") {
         let sections = Directory("Documentation").sections
@@ -52,7 +51,7 @@ Certain versions of Quick and Nimble only support certain versions of Swift. Dep
 
 ## Documentation
 
-All documentation can be found in the [Documentation folder](./Documentation), including [detailed installation instructions](./Documentation/en-us/InstallingQuick.md) for CocoaPods, Carthage, Git submodules, and more. For example, you can install Quick and [Nimble](https://github.com/Quick/Nimble) using CocoaPods by adding the following to your Podfile:
+All documentation can be found in the [Documentation folder](./Documentation), including [detailed installation instructions](./Documentation/en-us/InstallingQuick.md) for CocoaPods, Carthage, Git submodules, Swift Package Manager, and more. For example, you can install Quick and [Nimble](https://github.com/Quick/Nimble) using CocoaPods by adding the following to your `Podfile`:
 
 ```rb
 # Podfile
@@ -62,15 +61,22 @@ use_frameworks!
 target "MyApp" do
   # Normal libraries
 
-  abstract_target 'Tests' do
+  target 'MyApp_Tests' do
     inherit! :search_paths
-    target "MyAppTests"
-    target "MyAppUITests"
 
     pod 'Quick'
     pod 'Nimble'
   end
 end
+```
+
+You can also install Quick and Nimble using Swift Package Manager by adding the following to the dependencies section your `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/Quick/Quick.git", from: "7.0.0"),
+    .package(url: "https://github.com/Quick/Nimble.git", from: "12.0.0"),
+],
 ```
 
 ## Projects using Quick
@@ -85,6 +91,12 @@ Similar to projects using Quick, it would be nice to hear why people use Quick a
 
 Have something positive to say about Quick (or Nimble)? If yes, [provide a testimonial here](https://github.com/Quick/Quick/wiki/Who-uses-Quick).
 
+## Privacy Statement
+
+Quick is a library that is only used for testing and should never be included in the binary submitted to App Store Connect.
+Your app will be rejected if you do include Quick in the submitted binary because Quick uses private APIs to better integrate with Xcode.
+
+Despite not being shipped to Apple, Quick does not and will never collect any kind of analytics or tracking.
 
 ## License
 

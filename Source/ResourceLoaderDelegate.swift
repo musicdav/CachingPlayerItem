@@ -16,8 +16,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private let lock = NSLock()
 
     private var bufferData = Data()
-    private let downloadBufferLimit = CachingPlayerItemConfiguration.downloadBufferLimit
-    private let readDataLimit = CachingPlayerItemConfiguration.readDataLimit
+    private var configuration: CachingPlayerItemConfiguration { owner?.configuration ?? .default }
 
     private lazy var fileHandle = MediaFileHandle(filePath: saveFilePath)
 
@@ -34,7 +33,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private var contentInfoResponse: URLResponse?
     private var pendingDataRequests: [PendingRequestId: PendingDataRequest] = [:]
     private var fullMediaFileDownloadTask: URLSessionDataTask?
-    private var isDownloadComplete = false
+    private(set) var isDownloadComplete = false
 
     private let url: URL
     private let saveFilePath: String
@@ -47,6 +46,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         self.saveFilePath = saveFilePath
         self.owner = owner
         super.init()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
     }
 
@@ -78,7 +78,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     func resourceLoader(_ resourceLoader: AVAssetResourceLoader, didCancel loadingRequest: AVAssetResourceLoadingRequest) {
         addOperationOnQueue { [weak self] in
             guard let self else { return }
-            guard let key = pendingDataRequests.first(where: { $1.loadingRequest.request.url == loadingRequest.request.url })?.key else { return }
+            guard let key = pendingDataRequests.first(where: { $1.loadingRequest == loadingRequest })?.key else { return }
 
             pendingDataRequests[key]?.cancelTask()
             pendingDataRequests.removeValue(forKey: key)
@@ -187,7 +187,6 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 pendingContentInfoRequest = nil
                 pendingDataRequests.removeAll()
             }
-
         }
 
         // We need to only remove the file if it hasn't been fully downloaded
@@ -223,7 +222,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         lock.lock()
         defer { lock.unlock() }
 
-        guard bufferData.count >= downloadBufferLimit || forced else { return }
+        guard bufferData.count >= configuration.downloadBufferLimit || forced else { return }
 
         fileHandle.append(data: bufferData)
         bufferData = Data()
@@ -240,8 +239,8 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private func verify(response: URLResponse?) -> NSError? {
         guard let response = response as? HTTPURLResponse else { return nil }
 
-        let shouldVerifyDownloadedFileSize = CachingPlayerItemConfiguration.shouldVerifyDownloadedFileSize
-        let minimumExpectedFileSize = CachingPlayerItemConfiguration.minimumExpectedFileSize
+        let shouldVerifyDownloadedFileSize = configuration.shouldVerifyDownloadedFileSize
+        let minimumExpectedFileSize = configuration.minimumExpectedFileSize
         var error: NSError?
 
         if response.statusCode >= 400 {
@@ -257,7 +256,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
     private func checkAvailableDiskSpaceIfNeeded(response: URLResponse) -> NSError? {
         guard
-            CachingPlayerItemConfiguration.shouldCheckAvailableDiskSpaceBeforeCaching,
+            configuration.shouldCheckAvailableDiskSpaceBeforeCaching,
             let response = response as? HTTPURLResponse,
             let freeDiskSpace = fileHandle.freeDiskSpace
         else { return nil }
@@ -296,7 +295,13 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
 extension ResourceLoaderDelegate: PendingDataRequestDelegate {
     func pendingDataRequest(_ request: PendingDataRequest, hasSufficientCachedDataFor offset: Int, with length: Int) -> Bool {
-        fileHandle.fileSize >= length + offset
+        if configuration.allowsUncachedSeek {
+            // Request remote data temporarily if the requested data is not yet cached
+            return fileHandle.fileSize >= length + offset
+        } else {
+            // Always request cached data
+            return true
+        }
     }
 
     func pendingDataRequest(_ request: PendingDataRequest,
@@ -308,7 +313,7 @@ extension ResourceLoaderDelegate: PendingDataRequestDelegate {
 
             let bytesCached = fileHandle.fileSize
             // Data length to be loaded into memory with maximum size of readDataLimit.
-            let bytesToRespond = min(bytesCached - offset, length, readDataLimit)
+            let bytesToRespond = min(bytesCached - offset, length, configuration.readDataLimit)
             // Read data from disk and pass it to the dataRequest
             guard let data = fileHandle.readData(withOffset: offset, forLength: bytesToRespond) else {
                 finishLoadingPendingRequest(withId: request.id)
