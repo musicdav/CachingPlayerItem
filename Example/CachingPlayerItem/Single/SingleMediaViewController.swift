@@ -53,6 +53,7 @@ final class SingleMediaViewController: UIViewController {
         let cachingItem = CachingPlayerItem(model: video)
         cachingItem.delegate = self
         player = AVPlayer(playerItem: cachingItem)
+        player?.automaticallyWaitsToMinimizeStalling = false
 
         let playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = .resizeAspect

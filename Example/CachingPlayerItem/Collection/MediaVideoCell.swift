@@ -43,6 +43,7 @@ final class MediaVideoCell: UICollectionViewCell {
     func configure(with videoModel: VideoModel) {
         let item = CachingPlayerItem(model: videoModel)
         let player = AVPlayer(playerItem: item)
+        player.automaticallyWaitsToMinimizeStalling = false
         let layer = AVPlayerLayer(player: player)
         layer.videoGravity = .resizeAspectFill
         layer.frame = contentView.bounds
