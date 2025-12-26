@@ -31,6 +31,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         didSet { oldValue?.cancelTask() }
     }
     private var contentInfoResponse: URLResponse?
+    private var pendingContentInfoLoadingRequests: [AVAssetResourceLoadingRequest] = []
     private var pendingDataRequests: [PendingRequestId: PendingDataRequest] = [:]
     private var fullMediaFileDownloadTask: URLSessionDataTask?
     private(set) var isDownloadComplete = false
@@ -61,8 +62,23 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         guard let session else { return false }
 
         if let _ = loadingRequest.contentInformationRequest {
-            pendingContentInfoRequest = PendingContentInfoRequest(url: url, session: session, loadingRequest: loadingRequest, customHeaders: owner?.urlRequestHeaders)
-            pendingContentInfoRequest?.startTask()
+            if let response = contentInfoResponse {
+                fillInContentInformationRequest(for: loadingRequest, response: response)
+                loadingRequest.finishLoading()
+                return true
+            }
+
+            addOperationOnQueue { [weak self] in
+                guard let self else { return }
+
+                pendingContentInfoLoadingRequests.append(loadingRequest)
+
+                guard pendingContentInfoRequest == nil else { return }
+
+                let request = PendingContentInfoRequest(url: url, session: session, loadingRequest: loadingRequest, customHeaders: owner?.urlRequestHeaders)
+                pendingContentInfoRequest = request
+                request.startTask()
+            }
             return true
         } else if let _ = loadingRequest.dataRequest {
             let request = PendingDataRequest(url: url, session: session, loadingRequest: loadingRequest, customHeaders: owner?.urlRequestHeaders)
@@ -118,7 +134,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 guard (error as? URLError)?.code != .cancelled else { return }
 
                 if pendingContentInfoRequest?.id == taskId {
-                    finishLoadingPendingRequest(withId: taskId, error: error)
+                    finishLoadingPendingContentInfoRequests(error: error)
                     downloadFailed(with: error)
                 } else if fullMediaFileDownloadTask?.taskIdentifier == taskId {
                     downloadFailed(with: error)
@@ -130,14 +146,18 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
             }
 
             if let response = task.response, pendingContentInfoRequest?.id == taskId {
+                if pendingContentInfoRequest?.retryWithRangeIfNeeded(response: response) == true {
+                    return
+                }
+
                 let insufficientDiskSpaceError = checkAvailableDiskSpaceIfNeeded(response: response)
                 guard insufficientDiskSpaceError == nil else {
                     downloadFailed(with: insufficientDiskSpaceError!)
                     return
                 }
 
-                pendingContentInfoRequest?.fillInContentInformationRequest(with: response)
-                finishLoadingPendingRequest(withId: taskId)
+                fillInContentInformationRequests(response: response)
+                finishLoadingPendingContentInfoRequests()
                 contentInfoResponse = response
             } else {
                 finishLoadingPendingRequest(withId: taskId)
@@ -185,6 +205,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 guard let self else { return }
 
                 pendingContentInfoRequest = nil
+                pendingContentInfoLoadingRequests.removeAll()
                 pendingDataRequests.removeAll()
             }
         }
@@ -210,12 +231,38 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
     private func finishLoadingPendingRequest(withId id: PendingRequestId, error: Error? = nil) {
         if pendingContentInfoRequest?.id == id {
-            pendingContentInfoRequest?.finishLoading(with: error)
-            pendingContentInfoRequest = nil
+            finishLoadingPendingContentInfoRequests(error: error)
         } else if pendingDataRequests[id] != nil {
             pendingDataRequests[id]?.finishLoading(with: error)
             pendingDataRequests.removeValue(forKey: id)
         }
+    }
+
+    private func fillInContentInformationRequest(for loadingRequest: AVAssetResourceLoadingRequest, response: URLResponse) {
+        guard let contentInformationRequest = loadingRequest.contentInformationRequest else { return }
+
+        contentInformationRequest.contentType = response.processedInfoData.mimeType
+        contentInformationRequest.contentLength = response.processedInfoData.expectedContentLength
+        contentInformationRequest.isByteRangeAccessSupported = response.processedInfoData.isByteRangeAccessSupported
+    }
+
+    private func fillInContentInformationRequests(response: URLResponse) {
+        pendingContentInfoLoadingRequests.forEach { loadingRequest in
+            fillInContentInformationRequest(for: loadingRequest, response: response)
+        }
+    }
+
+    private func finishLoadingPendingContentInfoRequests(error: Error? = nil) {
+        pendingContentInfoLoadingRequests.forEach { loadingRequest in
+            if let error {
+                loadingRequest.finishLoading(with: error)
+            } else {
+                loadingRequest.finishLoading()
+            }
+        }
+
+        pendingContentInfoLoadingRequests.removeAll()
+        pendingContentInfoRequest = nil
     }
 
     private func writeBufferDataToFileIfNeeded(forced: Bool = false) {

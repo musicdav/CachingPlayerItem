@@ -14,7 +14,7 @@ class PendingRequest {
     private(set) var id = -1
     private let url: URL
     private let customHeaders: [String: String]?
-    private var task: URLSessionTask?
+    fileprivate var task: URLSessionTask?
     private var didCancelTask = false
     fileprivate unowned var session: URLSession
     let loadingRequest: AVAssetResourceLoadingRequest
@@ -28,7 +28,7 @@ class PendingRequest {
     }
 
     /// Creates an URLRequest with the required headers for bytes range and customHeaders set.
-    private func makeURLRequest() -> URLRequest {
+    fileprivate func makeURLRequest() -> URLRequest {
         var request = URLRequest(url: url)
 
         if let dataRequest = loadingRequest.dataRequest {
@@ -83,12 +83,54 @@ class PendingRequest {
 
 /// Wrapper for handling `AVAssetResourceLoadingContentInformationRequest`.
 class PendingContentInfoRequest: PendingRequest {
+    private enum RequestKind {
+        case head
+        case rangeFallback
+    }
+
+    private var requestKind: RequestKind = .head
+    private var didFallback = false
+
     private var contentInformationRequest: AVAssetResourceLoadingContentInformationRequest {
         loadingRequest.contentInformationRequest!
     }
 
     override func makeSessionTask(with request: URLRequest) -> URLSessionTask {
-        session.downloadTask(with: request)
+        session.dataTask(with: request)
+    }
+
+    override func startTask() {
+        startTask(using: requestKind)
+    }
+
+    func retryWithRangeIfNeeded(response: URLResponse?) -> Bool {
+        guard !didFallback else { return false }
+        guard let response = response as? HTTPURLResponse else { return false }
+
+        let statusCode = response.statusCode
+        let needsFallback = statusCode >= 400 || response.processedInfoData.expectedContentLength == -1
+        guard needsFallback else { return false }
+
+        didFallback = true
+        requestKind = .rangeFallback
+        startTask(using: requestKind)
+        return true
+    }
+
+    private func startTask(using kind: RequestKind) {
+        var request = makeURLRequest()
+        switch kind {
+        case .head:
+            request.httpMethod = "HEAD"
+        case .rangeFallback:
+            request.httpMethod = "GET"
+            request.setValue("bytes=0-1", forHTTPHeaderField: "Range")
+        }
+
+        let task = makeSessionTask(with: request)
+        id = task.taskIdentifier
+        self.task = task
+        task.resume()
     }
 
     func fillInContentInformationRequest(with response: URLResponse) {
