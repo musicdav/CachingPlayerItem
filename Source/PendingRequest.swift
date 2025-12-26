@@ -11,7 +11,7 @@ import AVFoundation
 /// Abstract class with properties required for processing `AVAssetResourceLoadingRequest`.
 class PendingRequest {
     /// URLSession task identifier.
-    private(set) var id = -1
+    fileprivate(set) var id = -1
     private let url: URL
     private let customHeaders: [String: String]?
     fileprivate var task: URLSessionTask?
