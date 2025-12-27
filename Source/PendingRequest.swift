@@ -60,17 +60,18 @@ class PendingRequest {
         task.resume()
     }
 
-    func cancelTask() {
+    func cancelTask(with error: Error? = nil) {
         task?.cancel()
 
         if !loadingRequest.isCancelled && !loadingRequest.isFinished {
-            finishLoading()
+            finishLoading(with: error)
         }
 
         didCancelTask = true
     }
 
     func finishLoading(with error: Error? = nil) {
+        guard !loadingRequest.isFinished else { return }
         if let error {
             loadingRequest.finishLoading(with: error)
         } else {

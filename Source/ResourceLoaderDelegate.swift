@@ -194,20 +194,20 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         fullMediaFileDownloadTask?.resume()
     }
 
-    func invalidateAndCancelSession(shouldResetData: Bool = true) {
+    func invalidateAndCancelSession(shouldResetData: Bool = true, error: Error? = URLError(.cancelled)) {
         session?.invalidateAndCancel()
         session = nil
         operationQueue.cancelAllOperations()
 
         if shouldResetData {
             bufferData = Data()
-            addOperationOnQueue { [weak self] in
-                guard let self else { return }
+        }
+        addOperationOnQueue { [weak self] in
+            guard let self else { return }
 
-                pendingContentInfoRequest = nil
-                pendingContentInfoLoadingRequests.removeAll()
-                pendingDataRequests.removeAll()
-            }
+            finishLoadingPendingContentInfoRequests(error: error)
+            pendingDataRequests.values.forEach { $0.cancelTask(with: error) }
+            pendingDataRequests.removeAll()
         }
 
         // We need to only remove the file if it hasn't been fully downloaded
@@ -253,7 +253,8 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     }
 
     private func finishLoadingPendingContentInfoRequests(error: Error? = nil) {
-        pendingContentInfoLoadingRequests.forEach { loadingRequest in
+        for loadingRequest in pendingContentInfoLoadingRequests {
+            guard loadingRequest.isFinished == false else { continue }
             if let error {
                 loadingRequest.finishLoading(with: error)
             } else {
@@ -316,7 +317,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     }
 
     private func downloadFailed(with error: Error) {
-        invalidateAndCancelSession()
+        invalidateAndCancelSession(error: error)
 
         DispatchQueue.main.async {
             self.owner?.delegate?.playerItem?(self.owner!, downloadingFailedWith: error)
