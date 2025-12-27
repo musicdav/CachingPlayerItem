@@ -38,7 +38,6 @@ public final class CachingPlayerItem: AVPlayerItem {
     private let cachingPlayerItemScheme = "cachingPlayerItemScheme"
 
     private lazy var resourceLoaderDelegate = ResourceLoaderDelegate(url: url, saveFilePath: saveFilePath, owner: self)
-    private let resourceLoaderQueue = DispatchQueue(label: "CachingPlayerItem.ResourceLoaderQueue")
     private let url: URL
     private let initialScheme: String?
     private let saveFilePath: String
@@ -143,7 +142,7 @@ public final class CachingPlayerItem: AVPlayerItem {
         let asset = AVURLAsset(url: urlWithCustomScheme, options: avUrlAssetOptions)
         super.init(asset: asset, automaticallyLoadedAssetKeys: nil)
 
-        asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: resourceLoaderQueue)
+        asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: DispatchQueue.main)
 
         addObservers()
     }
