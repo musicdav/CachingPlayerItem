@@ -223,9 +223,10 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
             assertionFailure("Session already created.")
             return
         }
-
-        let configuration = URLSessionConfiguration.default
+        let configuration = URLSessionConfiguration.ephemeral
         configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        configuration.httpShouldUsePipelining = false
+        configuration.httpMaximumConnectionsPerHost = 1
         session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
     }
 
