@@ -271,6 +271,9 @@ public final class CachingPlayerItem: AVPlayerItem {
             return
         }
 
+        removeObservers()
+        delegate = nil 
+
         resourceLoaderDelegate.invalidateAndCancelSession()
     }
 
