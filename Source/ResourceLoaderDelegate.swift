@@ -169,6 +169,10 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 writeBufferDataToFileIfNeeded(forced: true)
             }
 
+            if contentInfoResponse == nil, let response = task.response {
+                contentInfoResponse = response
+            }
+
             let error = verify(response: contentInfoResponse ?? task.response)
 
             guard error == nil else {
