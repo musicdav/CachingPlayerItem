@@ -74,6 +74,25 @@ extension MediaFileHandle {
         writeHandle.write(data)
     }
 
+    func write(data: Data, at offset: Int) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let writeHandle = writeHandle else { return }
+
+        writeHandle.seek(toFileOffset: UInt64(offset))
+        writeHandle.write(data)
+    }
+
+    func truncate(to size: Int) {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard let writeHandle = writeHandle else { return }
+
+        writeHandle.truncateFile(atOffset: UInt64(size))
+    }
+
     func synchronize() {
         lock.lock()
         defer { lock.unlock() }

@@ -16,6 +16,14 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private let lock = NSLock()
 
     private var bufferData = Data()
+    private var fullDownloadWriteOffset = 0
+    private var fullDownloadExpectedStart = 0
+    private var fullDownloadRetryCount = 0
+    private let maxFullDownloadRetries = 3
+    private let retryDelayBase: TimeInterval = 0.5
+    private var isRetryingFullDownload = false
+    private var contentInfoRetryCount = 0
+    private let maxContentInfoRetries = 3
     private var configuration: CachingPlayerItemConfiguration { owner?.configuration ?? .default }
 
     private lazy var fileHandle = MediaFileHandle(filePath: saveFilePath)
@@ -103,6 +111,45 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
     // MARK: URLSessionDelegate
 
+    func urlSession(_ session: URLSession,
+                    dataTask: URLSessionDataTask,
+                    didReceive response: URLResponse,
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        guard fullMediaFileDownloadTask?.taskIdentifier == dataTask.taskIdentifier else {
+            completionHandler(.allow)
+            return
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completionHandler(.allow)
+            return
+        }
+
+        let statusCode = httpResponse.statusCode
+        let expectedStart = fullDownloadExpectedStart
+        let contentRangeStart = parseContentRangeStart(from: httpResponse)
+        let start = contentRangeStart ?? -1
+
+        if expectedStart > 0 {
+            let isValidRangeResponse = statusCode == 206 && start == expectedStart
+            guard isValidRangeResponse else {
+                resetFullDownloadState()
+                dataTask.cancel()
+                startFileDownload(with: url)
+                completionHandler(.cancel)
+                return
+            }
+        } else if statusCode == 206 && start != 0 {
+            resetFullDownloadState()
+            dataTask.cancel()
+            startFileDownload(with: url)
+            completionHandler(.cancel)
+            return
+        }
+
+        completionHandler(.allow)
+    }
+
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         addOperationOnQueue { [weak self] in
             guard let self else { return }
@@ -134,9 +181,35 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 guard (error as? URLError)?.code != .cancelled else { return }
 
                 if pendingContentInfoRequest?.id == taskId {
+                    if shouldRetry(error: error),
+                       contentInfoRetryCount < maxContentInfoRetries,
+                       pendingContentInfoRequest?.isCancelled == false {
+                        contentInfoRetryCount += 1
+                        let delay = retryDelay(for: contentInfoRetryCount)
+                        DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+                            self?.addOperationOnQueue { [weak self] in
+                                guard let self, let request = self.pendingContentInfoRequest, request.isCancelled == false else { return }
+                                request.startTask()
+                            }
+                        }
+                        return
+                    }
+
                     finishLoadingPendingContentInfoRequests(error: error)
                     downloadFailed(with: error)
                 } else if fullMediaFileDownloadTask?.taskIdentifier == taskId {
+                    if shouldRetry(error: error), fullDownloadRetryCount < maxFullDownloadRetries {
+                        writeBufferDataToFileIfNeeded(forced: true)
+                        fullDownloadRetryCount += 1
+                        isRetryingFullDownload = true
+                        let delay = retryDelay(for: fullDownloadRetryCount)
+                        DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+                            guard let self else { return }
+                            self.startFileDownload(with: self.url, resetRetryCount: false)
+                        }
+                        return
+                    }
+
                     downloadFailed(with: error)
                 }  else {
                     finishLoadingPendingRequest(withId: taskId, error: error)
@@ -159,6 +232,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 fillInContentInformationRequests(response: response)
                 finishLoadingPendingContentInfoRequests()
                 contentInfoResponse = response
+                contentInfoRetryCount = 0
             } else {
                 finishLoadingPendingRequest(withId: taskId)
             }
@@ -180,19 +254,35 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
                 return
             }
 
+            fullDownloadRetryCount = 0
+            isRetryingFullDownload = false
             downloadComplete()
         }
     }
 
     // MARK: Internal methods
 
-    func startFileDownload(with url: URL) {
-        guard session == nil else { return }
+    func startFileDownload(with url: URL, resetRetryCount: Bool = true) {
+        if resetRetryCount {
+            fullDownloadRetryCount = 0
+            isRetryingFullDownload = false
+        } else {
+            isRetryingFullDownload = true
+        }
 
-        createURLSession()
+        writeBufferDataToFileIfNeeded(forced: true)
+        let existingSize = fileHandle.fileSize
+        fullDownloadWriteOffset = existingSize
+        fullDownloadExpectedStart = existingSize
+
+        fullMediaFileDownloadTask?.cancel()
+        ensureSession()
 
         var urlRequest = URLRequest(url: url)
         owner?.urlRequestHeaders?.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+        if existingSize > 0 {
+            urlRequest.setValue("bytes=\(existingSize)-", forHTTPHeaderField: "Range")
+        }
 
         fullMediaFileDownloadTask = session?.dataTask(with: urlRequest)
         fullMediaFileDownloadTask?.resume()
@@ -201,10 +291,18 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     func invalidateAndCancelSession(shouldResetData: Bool = true) {
         session?.invalidateAndCancel()
         session = nil
+        fullMediaFileDownloadTask = nil
         operationQueue.cancelAllOperations()
 
         if shouldResetData {
+            lock.lock()
             bufferData = Data()
+            lock.unlock()
+            fullDownloadWriteOffset = 0
+            fullDownloadExpectedStart = 0
+            fullDownloadRetryCount = 0
+            isRetryingFullDownload = false
+            contentInfoRetryCount = 0
             addOperationOnQueue { [weak self] in
                 guard let self else { return }
 
@@ -232,6 +330,12 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         configuration.httpShouldUsePipelining = false
         configuration.httpMaximumConnectionsPerHost = 3
         session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+    }
+
+    private func ensureSession() {
+        if session == nil {
+            createURLSession()
+        }
     }
 
     private func finishLoadingPendingRequest(withId id: PendingRequestId, error: Error? = nil) {
@@ -270,13 +374,48 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         pendingContentInfoRequest = nil
     }
 
+    private func parseContentRangeStart(from response: HTTPURLResponse) -> Int? {
+        let contentRange = response.allHeaderFields.first { key, _ in
+            (key as? String)?.lowercased() == "content-range"
+        }?.value as? String
+
+        guard let contentRange else { return nil }
+        let trimmed = contentRange.trimmingCharacters(in: .whitespacesAndNewlines)
+        let rangePart = trimmed.split(separator: " ").last ?? Substring(trimmed)
+        let normalizedRange = rangePart.hasPrefix("bytes=") ? rangePart.dropFirst("bytes=".count) : rangePart
+        guard let startPart = normalizedRange.split(separator: "-").first else { return nil }
+        return Int(String(startPart))
+    }
+
+    private func resetFullDownloadState() {
+        lock.lock()
+        bufferData = Data()
+        lock.unlock()
+        fileHandle.truncate(to: 0)
+        fullDownloadWriteOffset = 0
+        fullDownloadExpectedStart = 0
+        fullDownloadRetryCount = 0
+        isRetryingFullDownload = false
+    }
+
+    private func retryDelay(for retryCount: Int) -> TimeInterval {
+        retryDelayBase * pow(2.0, Double(retryCount - 1))
+    }
+
+    private func shouldRetry(error: Error) -> Bool {
+        (error as? URLError)?.code != .cancelled
+    }
+
     private func writeBufferDataToFileIfNeeded(forced: Bool = false) {
         lock.lock()
         defer { lock.unlock() }
 
         guard bufferData.count >= configuration.downloadBufferLimit || forced else { return }
 
-        fileHandle.append(data: bufferData)
+        guard bufferData.isEmpty == false else { return }
+
+        fileHandle.write(data: bufferData, at: fullDownloadWriteOffset)
+        fullDownloadWriteOffset += bufferData.count
         bufferData = Data()
     }
 
