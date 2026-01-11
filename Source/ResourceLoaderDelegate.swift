@@ -151,12 +151,8 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        addOperationOnQueue { [weak self] in
-            guard let self else { return }
-
-            pendingDataRequests[dataTask.taskIdentifier]?.respond(withRemoteData: data)
-        }
-
+        // Only handle data for the full media file download task
+        // PendingDataRequests no longer make network requests - they only read from disk cache
         if fullMediaFileDownloadTask?.taskIdentifier == dataTask.taskIdentifier {
             bufferData.append(data)
             writeBufferDataToFileIfNeeded()
@@ -417,6 +413,20 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         fileHandle.write(data: bufferData, at: fullDownloadWriteOffset)
         fullDownloadWriteOffset += bufferData.count
         bufferData = Data()
+        
+        // Notify waiting data requests that more data is available on disk
+        notifyWaitingDataRequests()
+    }
+    
+    /// Notifies all pending data requests that are waiting for more data to retry.
+    private func notifyWaitingDataRequests() {
+        addOperationOnQueue { [weak self] in
+            guard let self else { return }
+            
+            for (_, request) in pendingDataRequests where request.isWaitingForData {
+                request.retryWithCachedData()
+            }
+        }
     }
 
     private func downloadComplete() {
@@ -485,40 +495,40 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 // MARK: PendingDataRequestDelegate
 
 extension ResourceLoaderDelegate: PendingDataRequestDelegate {
-    func pendingDataRequest(_ request: PendingDataRequest, hasSufficientCachedDataFor offset: Int, with length: Int) -> Bool {
-        if configuration.allowsUncachedSeek {
-            // Request remote data temporarily if the requested data is not yet cached
-            return fileHandle.fileSize >= length + offset
-        } else {
-            // Always request cached data
-            return true
-        }
-    }
-
     func pendingDataRequest(_ request: PendingDataRequest,
                             requestCachedDataFor offset: Int,
                             with length: Int,
-                            completion: @escaping ((_ continueRequesting: Bool) -> Void)) {
+                            completion: @escaping ((_ result: CachedDataRequestResult) -> Void)) {
         addOperationOnQueue { [weak self] in
             guard let self else { return }
 
             let bytesCached = fileHandle.fileSize
+            
+            // If the requested offset is beyond what's currently on disk, wait for more data
+            if offset >= bytesCached {
+                completion(.waitForMoreData)
+                return
+            }
+            
             // Data length to be loaded into memory with maximum size of readDataLimit.
             let bytesToRespond = min(bytesCached - offset, length, configuration.readDataLimit)
+            
             // Read data from disk and pass it to the dataRequest
-            guard let data = fileHandle.readData(withOffset: offset, forLength: bytesToRespond) else {
-                finishLoadingPendingRequest(withId: request.id)
-                completion(false)
+            guard bytesToRespond > 0, let data = fileHandle.readData(withOffset: offset, forLength: bytesToRespond) else {
+                // No data available yet, wait for more
+                completion(.waitForMoreData)
                 return
             }
 
             request.respond(withCachedData: data)
 
             if data.count >= length {
+                // All requested data has been provided
                 finishLoadingPendingRequest(withId: request.id)
-                completion(false)
+                completion(.finished)
             } else {
-                completion(true)
+                // More data might be available, continue requesting
+                completion(.continueRequesting)
             }
         }
     }

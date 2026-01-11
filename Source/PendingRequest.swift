@@ -142,40 +142,41 @@ class PendingContentInfoRequest: PendingRequest {
 
 // MARK: PendingDataRequest
 
+/// Result of requesting cached data.
+enum CachedDataRequestResult {
+    /// All requested data has been provided, request is complete.
+    case finished
+    /// More data is available, continue requesting.
+    case continueRequesting
+    /// Not enough data available yet, wait for more data to be written to disk.
+    case waitForMoreData
+}
+
 /// Cached data request delegate.
 protocol PendingDataRequestDelegate: AnyObject {
-    /// Tells the `PendingDataRequest` if there is enough cached data.
-    func pendingDataRequest(_ request: PendingDataRequest, hasSufficientCachedDataFor offset: Int, with length: Int) -> Bool
-    /// Requests cached data. The returned `offset` and `length` are increased/reduced based on the data passed in `respond(withCachedData:)`.
+    /// Requests cached data from disk. The returned `offset` and `length` are increased/reduced based on the data passed in `respond(withCachedData:)`.
+    /// Returns a result indicating whether to continue, finish, or wait for more data.
     func pendingDataRequest(_ request: PendingDataRequest,
                             requestCachedDataFor offset: Int,
                             with length: Int,
-                            completion: @escaping ((_ continueRequesting: Bool) -> Void))
+                            completion: @escaping ((_ result: CachedDataRequestResult) -> Void))
 }
 
 /// Wrapper for handling  `AVAssetResourceLoadingDataRequest`.
+/// This class only reads from disk cache - it never makes network requests.
+/// When requested data is not yet available on disk, it waits for notification.
 class PendingDataRequest: PendingRequest {
     private var dataRequest: AVAssetResourceLoadingDataRequest { loadingRequest.dataRequest! }
     private lazy var requestedLength = dataRequest.requestedLength
     private lazy var fileDataOffset = Int(dataRequest.requestedOffset)
     weak var delegate: PendingDataRequestDelegate?
-
-    override func makeSessionTask(with request: URLRequest) -> URLSessionTask {
-        session.dataTask(with: request)
-    }
+    
+    /// Indicates whether this request is waiting for more data to be written to disk.
+    private(set) var isWaitingForData = false
 
     override func startTask() {
-        if delegate?.pendingDataRequest(self, hasSufficientCachedDataFor: fileDataOffset, with: requestedLength) == true {
-            // Cached data
-            requestCachedData()
-        } else {
-            // Remote data
-            super.startTask()
-        }
-    }
-
-    func respond(withRemoteData data: Data) {
-        dataRequest.respond(with: data)
+        // Always use cached data path - never make network requests
+        requestCachedData()
     }
 
     func respond(withCachedData data: Data) {
@@ -183,8 +184,15 @@ class PendingDataRequest: PendingRequest {
         fileDataOffset += data.count
         requestedLength -= data.count
     }
+    
+    /// Called when more data has been written to disk. Retries reading if this request was waiting.
+    func retryWithCachedData() {
+        guard isWaitingForData else { return }
+        isWaitingForData = false
+        requestCachedData()
+    }
 
-    /// Requests cached data recursively until `continueRequesting` is false.
+    /// Requests cached data recursively until finished or needs to wait.
     private func requestCachedData() {
         guard let delegate else { return }
 
@@ -192,9 +200,14 @@ class PendingDataRequest: PendingRequest {
             self,
             requestCachedDataFor: fileDataOffset,
             with: requestedLength,
-            completion: { [weak self] continueRequesting in
-                if continueRequesting {
+            completion: { [weak self] result in
+                switch result {
+                case .finished:
+                    break // Request complete
+                case .continueRequesting:
                     self?.requestCachedData()
+                case .waitForMoreData:
+                    self?.isWaitingForData = true
                 }
         })
     }
