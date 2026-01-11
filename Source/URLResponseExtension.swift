@@ -28,12 +28,18 @@ extension URLResponse {
                 return "org.xiph.flac" // iOS 11+ 支持
                 
             // MARK: - MP3
-            case "audio/mpeg", "audio/mp3", "audio/mpg", "audio/x-mpeg", "audio/x-mp3":
+            case "audio/mpeg", "audio/mpeg3", "audio/mp3", "audio/mpg", "audio/x-mpeg", "audio/x-mpeg3", "audio/x-mp3", "audio/x-mpg":
                 return AVFileType.mp3.rawValue // public.mp3
                 
             // MARK: - M4A / AAC (常用容器)
             case "audio/mp4", "audio/m4a", "audio/x-m4a":
                 return AVFileType.m4a.rawValue // com.apple.m4a-audio
+            case "audio/x-m4b":
+                return "public.mpeg-4-audio"
+            case "audio/x-m4p":
+                return "com.apple.protected-mpeg-4-audio"
+            case "audio/x-m4r":
+                return "com.apple.mpeg-4-ringtone"
                 
             // MARK: - WAV (无损)
             case "audio/wav", "audio/x-wav", "audio/wave":
@@ -47,14 +53,58 @@ extension URLResponse {
             // MARK: - AIFF (Apple 无损)
             case "audio/aiff", "audio/x-aiff":
                 return AVFileType.aiff.rawValue // public.aiff-audio
+
+            // MARK: - AU / AIFF-C (Legacy Apple Audio)
+            case "audio/basic":
+                return "public.au-audio"
+            case "audio/x-aifc":
+                return "public.aifc-audio"
                 
             // MARK: - AC3 (Dolby Digital)
             case "audio/ac3":
                 return AVFileType.ac3.rawValue // public.ac3-audio
+
+            // MARK: - Enhanced AC3
+            case "audio/enhanced-ac3":
+                return "public.enhanced-ac3-audio"
                 
             // MARK: - CAF (Core Audio Format)
             case "audio/x-caf":
                 return AVFileType.caf.rawValue
+
+            // MARK: - MP2 / MPA
+            case "audio/mpa":
+                return "public.mp2"
+
+            // MARK: - USAC
+            case "audio/usac":
+                return "public.mpeg-4-audio"
+
+            // MARK: - 3GPP / AMR
+            case "audio/3gpp":
+                return "public.3gpp"
+            case "audio/3gpp2":
+                return "public.3gpp2"
+            case "audio/amr", "audio/amr-wb":
+                return "org.3gpp.adaptive-multi-rate-audio"
+
+            // MARK: - OGG
+            case "audio/ogg":
+                return "org.xiph.ogg-audio"
+
+            // MARK: - QuickTime Audio
+            case "audio/x-quicktime":
+                return "com.apple.quicktime-audio"
+
+            // MARK: - WAV (vendor variants)
+            case "audio/vnd.wave":
+                return AVFileType.wav.rawValue // com.microsoft.waveform-audio
+
+            // MARK: - Playlist formats (audio-related)
+            case "audio/scpls", "audio/x-scpls":
+                return "public.pls-playlist"
+            case "audio/mpegurl", "audio/x-mpegurl", "application/vnd.apple.mpegurl", "application/x-mpegurl":
+                return "public.m3u-playlist"
                 
             default:
                 // 3. 模糊匹配兜底策略 (保留原有逻辑作为最后的保障)

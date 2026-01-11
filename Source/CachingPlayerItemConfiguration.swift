@@ -163,7 +163,7 @@ public struct CachingPlayerItemConfiguration {
      - Parameter logLevel: Log level. Defaults to `.none`.
      */
     public init(
-        downloadBufferLimit: Int = 15 * 1024 * 1024, // 15MB
+        downloadBufferLimit: Int = 1 * 1024 * 1024, // 1MB
         readDataLimit: Int = 10 * 1024 * 1024, // 10MB
         shouldVerifyDownloadedFileSize: Bool = false,
         minimumExpectedFileSize: Int = 0,
