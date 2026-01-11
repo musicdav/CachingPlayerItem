@@ -485,19 +485,10 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 // MARK: PendingDataRequestDelegate
 
 extension ResourceLoaderDelegate: PendingDataRequestDelegate {
-    /// Returns the total available data size (file + in-memory buffer)
-    private var totalAvailableDataSize: Int {
-        lock.lock()
-        let bufferSize = bufferData.count
-        lock.unlock()
-        return fileHandle.fileSize + bufferSize
-    }
-
     func pendingDataRequest(_ request: PendingDataRequest, hasSufficientCachedDataFor offset: Int, with length: Int) -> Bool {
         if configuration.allowsUncachedSeek {
             // Request remote data temporarily if the requested data is not yet cached
-            // Now considers both file data AND in-memory buffer data
-            return totalAvailableDataSize >= length + offset
+            return fileHandle.fileSize >= length + offset
         } else {
             // Always request cached data
             return true
@@ -511,66 +502,19 @@ extension ResourceLoaderDelegate: PendingDataRequestDelegate {
         addOperationOnQueue { [weak self] in
             guard let self else { return }
 
-            let fileSize = fileHandle.fileSize
-            
-            // Get a snapshot of buffer data safely
-            lock.lock()
-            let bufferSnapshot = bufferData
-            lock.unlock()
-            
-            let bufferStartOffset = fileSize  // bufferData starts where file ends
-            let totalAvailable = fileSize + bufferSnapshot.count
-            
-            // Calculate how much data we can respond with
-            let availableFromOffset = max(0, totalAvailable - offset)
-            let bytesToRespond = min(availableFromOffset, length, configuration.readDataLimit)
-            
-            guard bytesToRespond > 0 else {
-                finishLoadingPendingRequest(withId: request.id)
-                completion(false)
-                return
-            }
-            
-            var responseData = Data()
-            
-            // Part 1: Read from file if offset is within file range
-            if offset < fileSize {
-                let bytesFromFile = min(fileSize - offset, bytesToRespond)
-                if let fileData = fileHandle.readData(withOffset: offset, forLength: bytesFromFile) {
-                    responseData.append(fileData)
-                }
-            }
-            
-            // Part 2: Read from in-memory buffer if we need more data
-            let remainingBytesNeeded = bytesToRespond - responseData.count
-            if remainingBytesNeeded > 0 && !bufferSnapshot.isEmpty {
-                // Calculate the offset within the buffer
-                let bufferReadOffset: Int
-                if offset >= fileSize {
-                    // Request starts in buffer
-                    bufferReadOffset = offset - bufferStartOffset
-                } else {
-                    // Request starts in file but continues into buffer
-                    bufferReadOffset = 0
-                }
-                
-                if bufferReadOffset >= 0 && bufferReadOffset < bufferSnapshot.count {
-                    let bytesFromBuffer = min(bufferSnapshot.count - bufferReadOffset, remainingBytesNeeded)
-                    let bufferEndOffset = bufferReadOffset + bytesFromBuffer
-                    let bufferData = bufferSnapshot[bufferReadOffset..<bufferEndOffset]
-                    responseData.append(bufferData)
-                }
-            }
-            
-            guard !responseData.isEmpty else {
+            let bytesCached = fileHandle.fileSize
+            // Data length to be loaded into memory with maximum size of readDataLimit.
+            let bytesToRespond = min(bytesCached - offset, length, configuration.readDataLimit)
+            // Read data from disk and pass it to the dataRequest
+            guard let data = fileHandle.readData(withOffset: offset, forLength: bytesToRespond) else {
                 finishLoadingPendingRequest(withId: request.id)
                 completion(false)
                 return
             }
 
-            request.respond(withCachedData: responseData)
+            request.respond(withCachedData: data)
 
-            if responseData.count >= length {
+            if data.count >= length {
                 finishLoadingPendingRequest(withId: request.id)
                 completion(false)
             } else {
