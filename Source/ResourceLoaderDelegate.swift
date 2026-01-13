@@ -47,13 +47,40 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private let url: URL
     private let saveFilePath: String
     private weak var owner: CachingPlayerItem?
+    
+    /// Bitrate in kbps for transcoded streams. Used to estimate content length when not provided by server.
+    private let bitrateKbps: Double?
+    /// Duration in seconds. Used together with bitrateKbps to estimate content length.
+    private let durationSeconds: Double?
+    /// Estimated content length calculated from bitrate and duration (in bytes).
+    private var estimatedContentLength: Int64 {
+        guard let bitrateKbps = bitrateKbps, let durationSeconds = durationSeconds else {
+            return -1
+        }
+        // Validate inputs
+        guard bitrateKbps > 0, durationSeconds > 0 else {
+            return -1
+        }
+        // Formula: estimatedBytes = bitrateKbps * 1000 / 8 * durationSeconds
+        // = bitrateKbps * 125 * durationSeconds (simplified to avoid floating point issues)
+        let bytesPerSecond = bitrateKbps * 1000.0 / 8.0
+        let estimatedBytes = bytesPerSecond * durationSeconds
+        
+        // Apply upper limit to prevent overflow issues (10GB max)
+        let maxBytes: Double = 10.0 * 1024.0 * 1024.0 * 1024.0
+        let clampedBytes = min(estimatedBytes, maxBytes)
+        
+        return Int64(clampedBytes)
+    }
 
     // MARK: Init
 
-    init(url: URL, saveFilePath: String, owner: CachingPlayerItem?) {
+    init(url: URL, saveFilePath: String, owner: CachingPlayerItem?, bitrateKbps: Double? = nil, durationSeconds: Double? = nil) {
         self.url = url
         self.saveFilePath = saveFilePath
         self.owner = owner
+        self.bitrateKbps = bitrateKbps
+        self.durationSeconds = durationSeconds
         super.init()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleAppWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
@@ -160,9 +187,17 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
             guard let response = contentInfoResponse ?? dataTask.response else { return }
 
             DispatchQueue.main.async {
+                // Use actual content length if available, otherwise use estimated length
+                var expectedLength = response.processedInfoData.expectedContentLength
+                if expectedLength == -1 || expectedLength == 0 {
+                    let estimated = self.estimatedContentLength
+                    if estimated > 0 {
+                        expectedLength = estimated
+                    }
+                }
                 self.owner?.delegate?.playerItem?(self.owner!,
                                                   didDownloadBytesSoFar: self.fileHandle.fileSize + self.bufferData.count,
-                                                  outOf: Int(response.processedInfoData.expectedContentLength))
+                                                  outOf: Int(expectedLength))
             }
         }
     }
@@ -346,9 +381,20 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     private func fillInContentInformationRequest(for loadingRequest: AVAssetResourceLoadingRequest, response: URLResponse) {
         guard let contentInformationRequest = loadingRequest.contentInformationRequest else { return }
 
-        contentInformationRequest.contentType = response.processedInfoData.mimeType
-        contentInformationRequest.contentLength = response.processedInfoData.expectedContentLength
-        contentInformationRequest.isByteRangeAccessSupported = response.processedInfoData.isByteRangeAccessSupported
+        let processedData = response.processedInfoData
+        contentInformationRequest.contentType = processedData.mimeType
+        
+        // Use actual content length if available, otherwise use estimated length
+        var contentLength = processedData.expectedContentLength
+        if contentLength == -1 || contentLength == 0 {
+            let estimated = estimatedContentLength
+            if estimated > 0 {
+                contentLength = estimated
+                AppLogger.info("Using estimated content length: \(estimated) bytes (bitrate: \(bitrateKbps ?? 0) kbps, duration: \(durationSeconds ?? 0) sec)")
+            }
+        }
+        contentInformationRequest.contentLength = contentLength
+        contentInformationRequest.isByteRangeAccessSupported = processedData.isByteRangeAccessSupported
     }
 
     private func fillInContentInformationRequests(response: URLResponse) {

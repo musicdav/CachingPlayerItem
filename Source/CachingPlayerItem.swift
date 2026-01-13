@@ -37,7 +37,13 @@ import AVFoundation
 public final class CachingPlayerItem: AVPlayerItem {
     private let cachingPlayerItemScheme = "cachingPlayerItemScheme"
 
-    private lazy var resourceLoaderDelegate = ResourceLoaderDelegate(url: url, saveFilePath: saveFilePath, owner: self)
+    private lazy var resourceLoaderDelegate = ResourceLoaderDelegate(
+        url: url,
+        saveFilePath: saveFilePath,
+        owner: self,
+        bitrateKbps: bitrateKbps,
+        durationSeconds: durationSeconds
+    )
     private let url: URL
     private let initialScheme: String?
     private let saveFilePath: String
@@ -45,6 +51,11 @@ public final class CachingPlayerItem: AVPlayerItem {
     internal let configuration: CachingPlayerItemConfiguration
     /// HTTPHeaderFields set in avUrlAssetOptions using AVURLAssetHTTPHeaderFieldsKey
     internal var urlRequestHeaders: [String: String]?
+    
+    /// Bitrate in kbps for transcoded streams. Used to estimate content length when not provided by server.
+    internal let bitrateKbps: Double?
+    /// Duration in seconds. Used together with bitrateKbps to estimate content length.
+    internal let durationSeconds: Double?
 
     /// Useful for keeping relevant model associated with CachingPlayerItem instance. This is a **strong** reference, be mindful not to create a **retain cycle**.
     public var passOnObject: Any?
@@ -63,7 +74,7 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter url: URL referencing the media file.
      */
     public convenience init(url: URL) {
-        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: url.pathExtension), customFileExtension: nil, avUrlAssetOptions: nil)
+        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: url.pathExtension), customFileExtension: nil, avUrlAssetOptions: nil, bitrateKbps: nil, durationSeconds: nil)
     }
 
     /**
@@ -76,8 +87,8 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      see [Initialization Options.](https://developer.apple.com/documentation/avfoundation/avurlasset/initialization_options)
      */
-    public convenience init(url: URL, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default) {
-        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: url.pathExtension), customFileExtension: nil, avUrlAssetOptions: avUrlAssetOptions, configuration: configuration)
+    public convenience init(url: URL, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default, bitrateKbps: Double? = nil, durationSeconds: Double? = nil) {
+        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: url.pathExtension), customFileExtension: nil, avUrlAssetOptions: avUrlAssetOptions, configuration: configuration, bitrateKbps: bitrateKbps, durationSeconds: durationSeconds)
     }
 
     /**
@@ -92,8 +103,8 @@ public final class CachingPlayerItem: AVPlayerItem {
 
      - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
      */
-    public convenience init(url: URL, customFileExtension: String, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default) {
-        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: customFileExtension), customFileExtension: customFileExtension, avUrlAssetOptions: avUrlAssetOptions, configuration: configuration)
+    public convenience init(url: URL, customFileExtension: String, avUrlAssetOptions: [String: Any]? = nil, configuration: CachingPlayerItemConfiguration = .default, bitrateKbps: Double? = nil, durationSeconds: Double? = nil) {
+        self.init(url: url, saveFilePath: Self.randomFilePath(withExtension: customFileExtension), customFileExtension: customFileExtension, avUrlAssetOptions: avUrlAssetOptions, configuration: configuration, bitrateKbps: bitrateKbps, durationSeconds: durationSeconds)
     }
 
     /**
@@ -114,7 +125,9 @@ public final class CachingPlayerItem: AVPlayerItem {
                 saveFilePath: String,
                 customFileExtension: String?,
                 avUrlAssetOptions: [String: Any]? = nil,
-                configuration: CachingPlayerItemConfiguration = .default) {
+                configuration: CachingPlayerItemConfiguration = .default,
+                bitrateKbps: Double? = nil,
+                durationSeconds: Double? = nil) {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let scheme = components.scheme,
               var urlWithCustomScheme = url.withScheme(cachingPlayerItemScheme) else {
@@ -125,6 +138,8 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.saveFilePath = saveFilePath
         self.initialScheme = scheme
         self.configuration = configuration
+        self.bitrateKbps = bitrateKbps
+        self.durationSeconds = durationSeconds
 
         if let ext = customFileExtension {
             urlWithCustomScheme.deletePathExtension()
@@ -163,6 +178,8 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.initialScheme = nil
         self.customFileExtension = nil
         self.configuration = configuration
+        self.bitrateKbps = nil
+        self.durationSeconds = nil
 
         let asset = AVURLAsset(url: url, options: avUrlAssetOptions)
         super.init(asset: asset, automaticallyLoadedAssetKeys: nil)
@@ -217,6 +234,8 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.initialScheme = nil
         self.customFileExtension = nil
         self.configuration = configuration
+        self.bitrateKbps = nil
+        self.durationSeconds = nil
 
         super.init(asset: AVURLAsset(url: url), automaticallyLoadedAssetKeys: nil)
 
@@ -235,6 +254,8 @@ public final class CachingPlayerItem: AVPlayerItem {
         self.saveFilePath = ""
         self.customFileExtension = nil
         self.configuration = .default
+        self.bitrateKbps = nil
+        self.durationSeconds = nil
         super.init(asset: asset, automaticallyLoadedAssetKeys: automaticallyLoadedAssetKeys)
 
         addObservers()
