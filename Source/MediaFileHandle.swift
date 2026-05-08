@@ -22,8 +22,6 @@ final class MediaFileHandle {
 
         if !FileManager.default.fileExists(atPath: filePath) {
             FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil)
-        } else {
-            AppLogger.warning("File already exists at \(filePath). A non empty file can cause unexpected behavior.")
         }
     }
 

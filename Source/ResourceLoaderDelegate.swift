@@ -347,6 +347,8 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         guard isDownloadComplete == false else { return }
 
         fileHandle.deleteFile()
+        // Also remove .meta sidecar so incomplete cache is not mistaken as valid
+        try? FileManager.default.removeItem(atPath: saveFilePath + ".meta")
     }
 
     // MARK: Private methods
@@ -477,6 +479,15 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
     private func downloadComplete() {
         isDownloadComplete = true
+
+        // Write .meta sidecar with actual downloaded size and MIME type for future cache validation.
+        // Format: line 1 = file size, line 2 = MIME type from HTTP response.
+        let metaPath = saveFilePath + ".meta"
+        let actualSize = fileHandle.fileSize
+        let mimeType = contentInfoResponse?.mimeType ?? "unknown"
+        let metaContent = "\(actualSize)\n\(mimeType)"
+        try? metaContent.write(toFile: metaPath, atomically: true, encoding: .utf8)
+        AppLogger.info("Download complete: \(saveFilePath), size: \(actualSize) bytes, mime: \(mimeType)")
 
         DispatchQueue.main.async {
             self.owner?.delegate?.playerItem?(self.owner!, didFinishDownloadingFileAt: self.saveFilePath)

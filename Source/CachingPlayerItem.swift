@@ -261,6 +261,119 @@ public final class CachingPlayerItem: AVPlayerItem {
         addObservers()
     }
 
+    // MARK: Cache-aware factory method
+
+    /**
+     Play from cache if a complete file exists, otherwise download fresh.
+
+     On first download, a `.meta` sidecar file is automatically created alongside the
+     cached media file recording its size. On subsequent calls, this method reads the
+     `.meta` file and compares it with the actual file size to determine completeness.
+
+     - If both the media file and `.meta` exist, and the file size matches → plays from local.
+     - If the file is incomplete or `.meta` is missing → **deletes** any partial file and re-downloads.
+
+     - parameter url: Remote media URL.
+     - parameter saveFilePath: A **stable, deterministic** file path for caching (e.g. based on URL hash).
+     - parameter customFileExtension: Media file extension. E.g. mp3, m4a.
+     - parameter avUrlAssetOptions: AVURLAsset initialization options.
+     - parameter configuration: Caching/downloading configuration.
+     - parameter bitrateKbps: Bitrate in kbps for transcoded streams.
+     - parameter durationSeconds: Duration in seconds.
+     */
+    public static func withCacheCheck(
+        url: URL,
+        saveFilePath: String,
+        customFileExtension: String? = nil,
+        avUrlAssetOptions: [String: Any]? = nil,
+        configuration: CachingPlayerItemConfiguration = .default,
+        bitrateKbps: Double? = nil,
+        durationSeconds: Double? = nil
+    ) -> CachingPlayerItem {
+        let fileManager = FileManager.default
+        let metaPath = saveFilePath + ".meta"
+
+        if fileManager.fileExists(atPath: saveFilePath),
+           fileManager.fileExists(atPath: metaPath),
+           let metaContent = try? String(contentsOfFile: metaPath, encoding: .utf8) {
+            let lines = metaContent.components(separatedBy: "\n")
+            if let sizeLine = lines.first,
+               let expectedSize = Int64(sizeLine.trimmingCharacters(in: .whitespacesAndNewlines)),
+               expectedSize > 0 {
+                let fileSize = (try? fileManager.attributesOfItem(atPath: saveFilePath))?[.size] as? Int64 ?? 0
+
+                if fileSize >= expectedSize {
+                    // Determine correct file extension from cached MIME type
+                    let cachedMime = lines.count > 1 ? lines[1].trimmingCharacters(in: .whitespacesAndNewlines) : nil
+                    let resolvedExtension = fileExtension(fromMime: cachedMime) ?? customFileExtension
+
+                    AppLogger.info("Cache hit: \(saveFilePath) (size: \(fileSize), expected: \(expectedSize), mime: \(cachedMime ?? "nil"), ext: \(resolvedExtension ?? "nil"))")
+                    let fileURL = URL(fileURLWithPath: saveFilePath)
+                    return CachingPlayerItem(
+                        filePathURL: fileURL,
+                        fileExtension: resolvedExtension,
+                        configuration: configuration
+                    )
+                }
+            }
+        }
+
+        // Cache miss or incomplete — delete everything and re-download
+        AppLogger.info("Cache miss: \(saveFilePath), downloading from \(url)")
+        try? fileManager.removeItem(atPath: saveFilePath)
+        try? fileManager.removeItem(atPath: metaPath)
+
+        // Ensure parent directory exists
+        let directory = (saveFilePath as NSString).deletingLastPathComponent
+        if !fileManager.fileExists(atPath: directory) {
+            try? fileManager.createDirectory(atPath: directory, withIntermediateDirectories: true, attributes: nil)
+        }
+
+        return CachingPlayerItem(
+            url: url,
+            saveFilePath: saveFilePath,
+            customFileExtension: customFileExtension,
+            avUrlAssetOptions: avUrlAssetOptions,
+            configuration: configuration,
+            bitrateKbps: bitrateKbps,
+            durationSeconds: durationSeconds
+        )
+    }
+
+    /// Maps HTTP MIME type to file extension for AVFoundation playback.
+    private static func fileExtension(fromMime mime: String?) -> String? {
+        guard let mime = mime?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
+              !mime.isEmpty, mime != "unknown" else {
+            return nil
+        }
+
+        switch mime {
+        case "audio/mpeg", "audio/mp3", "audio/mpeg3", "audio/x-mpeg", "audio/x-mp3":
+            return "mp3"
+        case "audio/mp4", "audio/m4a", "audio/x-m4a", "audio/aac", "audio/aacp", "audio/x-aac":
+            return "m4a"
+        case "audio/flac", "audio/x-flac":
+            return "flac"
+        case "audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave":
+            return "wav"
+        case "audio/aiff", "audio/x-aiff":
+            return "aiff"
+        case "audio/ogg":
+            return "ogg"
+        case "audio/opus":
+            return "opus"
+        default:
+            // Try extracting subtype as fallback: "audio/xyz" → "xyz"
+            if mime.hasPrefix("audio/") {
+                let subtype = String(mime.dropFirst("audio/".count))
+                if !subtype.isEmpty, !subtype.contains("/") {
+                    return subtype
+                }
+            }
+            return nil
+        }
+    }
+
     deinit {
         removeObservers()
 
