@@ -108,6 +108,7 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
 
                 pendingContentInfoLoadingRequests.append(loadingRequest)
 
+                guard canUseEstimatedContentInformation == false else { return }
                 guard pendingContentInfoRequest == nil else { return }
 
                 let request = PendingContentInfoRequest(url: url, session: session, loadingRequest: loadingRequest, customHeaders: owner?.urlRequestHeaders)
@@ -172,6 +173,16 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
             startFileDownload(with: url)
             completionHandler(.cancel)
             return
+        }
+
+        if statusCode < 400, canUseEstimatedContentInformation {
+            contentInfoResponse = response
+            addOperationOnQueue { [weak self] in
+                guard let self else { return }
+
+                fillInContentInformationRequests(response: response)
+                finishLoadingPendingContentInfoRequests()
+            }
         }
 
         completionHandler(.allow)
@@ -397,6 +408,10 @@ final class ResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         }
         contentInformationRequest.contentLength = contentLength
         contentInformationRequest.isByteRangeAccessSupported = processedData.isByteRangeAccessSupported
+    }
+
+    private var canUseEstimatedContentInformation: Bool {
+        estimatedContentLength > 0
     }
 
     private func fillInContentInformationRequests(response: URLResponse) {
