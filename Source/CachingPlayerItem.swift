@@ -213,24 +213,28 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter fileExtension: Media file extension. E.g. mp4, mp3. **Required**  if `filePathURL.pathExtension` is empty.
 
      - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
-     */
+    */
     public init(filePathURL: URL, fileExtension: String? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         if let fileExtension = fileExtension {
-            let resolvedURL = filePathURL.deletingPathExtension().appendingPathExtension(fileExtension)
+            let desiredExtension = fileExtension
+                .trimmingCharacters(in: CharacterSet(charactersIn: "."))
+                .lowercased()
+            let currentExtension = filePathURL.pathExtension.lowercased()
 
-            if resolvedURL.standardizedFileURL == filePathURL.standardizedFileURL {
+            if desiredExtension.isEmpty || currentExtension == desiredExtension {
                 self.url = filePathURL
             } else {
-                // Removes old SymLinks which cause issues
-                let values = try? resolvedURL.resourceValues(forKeys: [.isSymbolicLinkKey])
+                let playbackURL = filePathURL.appendingPathExtension(desiredExtension)
+
+                let values = try? playbackURL.resourceValues(forKeys: [.isSymbolicLinkKey])
                 if values?.isSymbolicLink == true {
-                    try? FileManager.default.removeItem(at: resolvedURL)
+                    try? FileManager.default.removeItem(at: playbackURL)
                 }
 
-                if !FileManager.default.fileExists(atPath: resolvedURL.path) {
+                if !FileManager.default.fileExists(atPath: playbackURL.path) {
                     do {
-                        try FileManager.default.createSymbolicLink(at: resolvedURL, withDestinationURL: filePathURL)
-                        self.url = resolvedURL
+                        try FileManager.default.createSymbolicLink(at: playbackURL, withDestinationURL: filePathURL)
+                        self.url = playbackURL
                     } catch {
                         self.url = filePathURL
                     }
