@@ -216,6 +216,26 @@ class CachingPlayerItemSpec: QuickSpec {
                     expect(try? Data(contentsOf: localFileURL)).to(equal(testData))
                 }
 
+                it("uses the original file when the resolved extension path already exists as a regular file") {
+                    let localFileURL = tempDirectory.appendingPathComponent("cached-track")
+                    let resolvedURL = tempDirectory.appendingPathComponent("cached-track.mp3")
+                    let cachedData = Data([0x01, 0x02, 0x03])
+                    let existingData = Data([0x04, 0x05, 0x06])
+                    FileManager.default.createFile(atPath: localFileURL.path, contents: cachedData, attributes: nil)
+                    FileManager.default.createFile(atPath: resolvedURL.path, contents: existingData, attributes: nil)
+
+                    sut = CachingPlayerItem(filePathURL: localFileURL, fileExtension: "mp3")
+
+                    guard let urlAsset = sut.asset as? AVURLAsset else {
+                        fail("Expected asset to be AVURLAsset")
+                        return
+                    }
+
+                    expect(urlAsset.url).to(equal(localFileURL))
+                    expect(try? Data(contentsOf: localFileURL)).to(equal(cachedData))
+                    expect(try? Data(contentsOf: resolvedURL)).to(equal(existingData))
+                }
+
                 it("removes old symbolic links before creating new ones") {
                     let originalFile = tempDirectory.appendingPathComponent("original")
                     FileManager.default.createFile(atPath: originalFile.path, contents: Data([0x01]), attributes: nil)

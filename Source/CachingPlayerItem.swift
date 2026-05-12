@@ -221,16 +221,21 @@ public final class CachingPlayerItem: AVPlayerItem {
             if resolvedURL.standardizedFileURL == filePathURL.standardizedFileURL {
                 self.url = filePathURL
             } else {
-                self.url = resolvedURL
-
                 // Removes old SymLinks which cause issues
-                let values = try? self.url.resourceValues(forKeys: [.isSymbolicLinkKey])
+                let values = try? resolvedURL.resourceValues(forKeys: [.isSymbolicLinkKey])
                 if values?.isSymbolicLink == true {
-                    try? FileManager.default.removeItem(at: self.url)
+                    try? FileManager.default.removeItem(at: resolvedURL)
                 }
 
-                if !FileManager.default.fileExists(atPath: self.url.path) {
-                    try? FileManager.default.createSymbolicLink(at: self.url, withDestinationURL: filePathURL)
+                if !FileManager.default.fileExists(atPath: resolvedURL.path) {
+                    do {
+                        try FileManager.default.createSymbolicLink(at: resolvedURL, withDestinationURL: filePathURL)
+                        self.url = resolvedURL
+                    } catch {
+                        self.url = filePathURL
+                    }
+                } else {
+                    self.url = filePathURL
                 }
             }
         } else {
