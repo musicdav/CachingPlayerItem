@@ -213,7 +213,7 @@ public final class CachingPlayerItem: AVPlayerItem {
      - parameter fileExtension: Media file extension. E.g. mp4, mp3. **Required**  if `filePathURL.pathExtension` is empty.
 
      - parameter configuration: Configuration for the caching and downloading behavior. Defaults to `.default`.
-    */
+     */
     public init(filePathURL: URL, fileExtension: String? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         if let fileExtension = fileExtension {
             let desiredExtension = fileExtension
@@ -367,20 +367,54 @@ public final class CachingPlayerItem: AVPlayerItem {
         }
 
         switch mime {
-        case "audio/mpeg", "audio/mp3", "audio/mpeg3", "audio/x-mpeg", "audio/x-mp3":
+        case "audio/mpeg", "audio/mp3", "audio/mpeg3", "audio/mpg", "audio/x-mpeg", "audio/x-mpeg3", "audio/x-mp3", "audio/x-mpg":
             return "mp3"
-        case "audio/mp4", "audio/m4a", "audio/x-m4a", "audio/aac", "audio/aacp", "audio/x-aac":
+        case "audio/mp4", "audio/m4a", "audio/x-m4a":
             return "m4a"
+        case "audio/x-m4b":
+            return "m4b"
+        case "audio/x-m4p":
+            return "m4p"
+        case "audio/x-m4r":
+            return "m4r"
+        case "audio/aac", "audio/aacp", "audio/x-aac":
+            return "aac"
         case "audio/flac", "audio/x-flac":
             return "flac"
         case "audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave":
             return "wav"
         case "audio/aiff", "audio/x-aiff":
             return "aiff"
+        case "audio/basic":
+            return "au"
+        case "audio/x-aifc":
+            return "aifc"
+        case "audio/ac3":
+            return "ac3"
+        case "audio/enhanced-ac3":
+            return "eac3"
+        case "audio/x-caf":
+            return "caf"
+        case "audio/mpa":
+            return "mpa"
+        case "audio/usac":
+            return "m4a"
+        case "audio/3gpp":
+            return "3gp"
+        case "audio/3gpp2":
+            return "3g2"
+        case "audio/amr", "audio/amr-wb":
+            return "amr"
         case "audio/ogg":
             return "ogg"
         case "audio/opus":
             return "opus"
+        case "audio/x-quicktime":
+            return "mov"
+        case "audio/scpls", "audio/x-scpls":
+            return "pls"
+        case "audio/mpegurl", "audio/x-mpegurl", "application/vnd.apple.mpegurl", "application/x-mpegurl":
+            return "m3u"
         default:
             // Try extracting subtype as fallback: "audio/xyz" → "xyz"
             if mime.hasPrefix("audio/") {
