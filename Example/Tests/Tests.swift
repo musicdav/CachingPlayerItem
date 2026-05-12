@@ -199,6 +199,23 @@ class CachingPlayerItemSpec: QuickSpec {
                     expect(fileType).to(equal(.typeSymbolicLink))
                 }
 
+                it("does not remove the source file when the resolved extension path matches the file path") {
+                    let localFileURL = tempDirectory.appendingPathComponent("cached-track.mp3")
+                    let testData = Data([0x01, 0x02, 0x03])
+                    FileManager.default.createFile(atPath: localFileURL.path, contents: testData, attributes: nil)
+
+                    sut = CachingPlayerItem(filePathURL: localFileURL, fileExtension: "mp3")
+
+                    guard let urlAsset = sut.asset as? AVURLAsset else {
+                        fail("Expected asset to be AVURLAsset")
+                        return
+                    }
+
+                    expect(urlAsset.url).to(equal(localFileURL))
+                    expect(FileManager.default.fileExists(atPath: localFileURL.path)).to(beTrue())
+                    expect(try? Data(contentsOf: localFileURL)).to(equal(testData))
+                }
+
                 it("removes old symbolic links before creating new ones") {
                     let originalFile = tempDirectory.appendingPathComponent("original")
                     FileManager.default.createFile(atPath: originalFile.path, contents: Data([0x01]), attributes: nil)
@@ -216,6 +233,32 @@ class CachingPlayerItemSpec: QuickSpec {
                     }
 
                     expect(urlAsset.url.path).to(equal(symLinkPath))
+                }
+
+                it("keeps a complete cached file when withCacheCheck resolves to the same extension path") {
+                    let cachedFileURL = tempDirectory.appendingPathComponent("complete-cache.mp3")
+                    let testData = Data([0x01, 0x02, 0x03, 0x04])
+                    FileManager.default.createFile(atPath: cachedFileURL.path, contents: testData, attributes: nil)
+                    try? "\(testData.count)\naudio/mpeg".write(
+                        to: cachedFileURL.appendingPathExtension("meta"),
+                        atomically: true,
+                        encoding: .utf8
+                    )
+
+                    sut = CachingPlayerItem.withCacheCheck(
+                        url: testURL,
+                        saveFilePath: cachedFileURL.path,
+                        customFileExtension: "mp3"
+                    )
+
+                    guard let urlAsset = sut.asset as? AVURLAsset else {
+                        fail("Expected asset to be AVURLAsset")
+                        return
+                    }
+
+                    expect(urlAsset.url).to(equal(cachedFileURL))
+                    expect(FileManager.default.fileExists(atPath: cachedFileURL.path)).to(beTrue())
+                    expect(try? Data(contentsOf: cachedFileURL)).to(equal(testData))
                 }
             }
 

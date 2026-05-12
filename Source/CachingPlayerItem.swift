@@ -216,13 +216,23 @@ public final class CachingPlayerItem: AVPlayerItem {
      */
     public init(filePathURL: URL, fileExtension: String? = nil, configuration: CachingPlayerItemConfiguration = .default) {
         if let fileExtension = fileExtension {
-            let url = filePathURL.deletingPathExtension()
-            self.url = url.appendingPathExtension(fileExtension)
+            let resolvedURL = filePathURL.deletingPathExtension().appendingPathExtension(fileExtension)
 
-            // Removes old SymLinks which cause issues
-            try? FileManager.default.removeItem(at: self.url)
+            if resolvedURL.standardizedFileURL == filePathURL.standardizedFileURL {
+                self.url = filePathURL
+            } else {
+                self.url = resolvedURL
 
-            try? FileManager.default.createSymbolicLink(at: self.url, withDestinationURL: filePathURL)
+                // Removes old SymLinks which cause issues
+                let values = try? self.url.resourceValues(forKeys: [.isSymbolicLinkKey])
+                if values?.isSymbolicLink == true {
+                    try? FileManager.default.removeItem(at: self.url)
+                }
+
+                if !FileManager.default.fileExists(atPath: self.url.path) {
+                    try? FileManager.default.createSymbolicLink(at: self.url, withDestinationURL: filePathURL)
+                }
+            }
         } else {
             assert(filePathURL.pathExtension.isEmpty == false,
                    "CachingPlayerItem error: filePathURL pathExtension empty, pass the extension in `fileExtension` parameter")
